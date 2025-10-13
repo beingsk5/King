@@ -64,8 +64,10 @@ jobs:
           cd kernel 
           patch -p1 < kernelsu.patch
           patch -p1 < path_umount.patch
-          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
+          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s main
           cd ..
+#         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
+          
           
       - name: 📥 Clone AnyKernel3
         run: |
