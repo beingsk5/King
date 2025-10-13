@@ -1,4 +1,4 @@
-name: Build KernelSU-Next for OnePlus-7-Series
+name: Build SukiSU-Ultra for OnePlus-7-Series
 
 on:
   push:
@@ -113,7 +113,7 @@ jobs:
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
       - name: 🤌 Copy zip file to get 2 different zip files
         run: |
-          ZIP_ALTERNATIVE="KernelSU-SukiSU-Ultra-AICP-RagnaR-${DEVICE_CODENAME}-latest.zip"
+          ZIP_ALTERNATIVE="SukiSU-Ultra-AICP-RagnaR-${DEVICE_CODENAME}-latest.zip"
           cp ${ZIP_NAME} $ZIP_ALTERNATIVE
           echo "Copied ${ZIP_NAME} as $ZIP_ALTERNATIVE"
           echo "ZIP_ALTERNATIVE=$ZIP_ALTERNATIVE" >> $GITHUB_ENV
