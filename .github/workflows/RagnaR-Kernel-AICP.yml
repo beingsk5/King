@@ -67,10 +67,7 @@ jobs:
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
           cd ..
 #         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
-
-      - name: Patch missing includes in pm8150.dtsi
-        run: |
-         sed -i '1i #include <dt-bindings/interrupt-controller/irq.h>\n#include <dt-bindings/spmi/spmi.h>\n#include <dt-bindings/iio/qcom,spmi-vadc.h>\n' arch/arm64/boot/dts/18821/pm8150.dtsi    
+    
           
       - name: 📥 Clone AnyKernel3
         run: |
