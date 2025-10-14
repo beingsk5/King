@@ -41,8 +41,6 @@ jobs:
          axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/7143812acf96c9af445b164656ae7f424a67a573/clang-r536225.tar.gz
          mkdir clang && tar -zxvf linux-x86-7143812acf96c9af445b164656ae7f424a67a573-clang-r536225.tar.gz -C clang
          
-#      - name: 📂 Checkout builder's sourcecode and get files
-#        uses: actions/checkout@v4
         
       - name: ⚡ Checkout kernel's sourcecode and clone submodules
         run: |
@@ -66,8 +64,6 @@ jobs:
           patch -p1 < path_umount.patch
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
           cd ..
-#         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
-    
           
       - name: 📥 Clone AnyKernel3
         run: |
@@ -83,10 +79,6 @@ jobs:
           echo "Kernel Version: $KERNEL_VERSION"
           echo "DEVICE_CODENAME=$DEVICE_CODENAME" >> $GITHUB_ENV
           echo "KERNEL_VERSION=$KERNEL_VERSION" >> $GITHUB_ENV
-      
-#      - name: Make build.sh executable
-#        run: |
-#          chmod +x ./build.sh
         
       - name: 🛠️ Build the kernel
         run: |
@@ -103,8 +95,6 @@ jobs:
           cd kernel
           make $KERNEL_CMDLINE CC="ccache clang" $KERNEL_DEFCONFIG
           make $KERNEL_CMDLINE CC="ccache clang" -j$(nproc --all)
-#          cp out/arch/arm64/boot/Image ../AnyKernel3
-#          cd ..
 
       - name: 🚀 Copy the compiled kernel to AnyKernel3 then create the zip
         run: |
