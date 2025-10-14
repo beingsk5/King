@@ -82,7 +82,6 @@ jobs:
         
       - name: 🛠️ Build the kernel
         run: |
-          export DTC_FLAGS="-Wno-error"
           export KERNEL_DEFCONFIG="lineage_sm8150_defconfig"
           export KERNEL_CMDLINE="ARCH=arm64 CC=clang CROSS_COMPILE_COMPAT=aarch64-linux-android- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- READELF=llvm-readelf LLVM_DIS=llvm-dis AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip LLVM=1 LLVM_IAS=1 LD=ld.lld HOSTCC=clang HOSTCXX=clang++ O=out"
           export PATH=$(pwd)/clang/bin/:$PATH
@@ -94,7 +93,7 @@ jobs:
           export TARGET_PRODUCT=msmnile
           cd kernel
           make $KERNEL_CMDLINE CC="ccache clang" $KERNEL_DEFCONFIG
-          make $KERNEL_CMDLINE CC="ccache clang" Image.gz-dtb -j$(nproc --all)
+          make $KERNEL_CMDLINE CC="ccache clang" Image -j$(nproc --all)
           
       - name: 🚀 Copy the compiled kernel to AnyKernel3 then create the zip
         run: |
