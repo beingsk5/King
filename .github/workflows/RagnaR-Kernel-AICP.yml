@@ -38,7 +38,7 @@ jobs:
          sudo apt install libelf-dev libarchive-tools lld llvm axel binutils make python3 libssl-dev build-essential bc  bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs -y
          sudo apt install openjdk-17-jdk-headless -y
          
-         axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r536225.tar.gz
+         axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/7143812acf96c9af445b164656ae7f424a67a573/clang-r536225.tar.gz
          mkdir clang && tar -zxvf linux-x86-refs_heads_main-clang-r536225.tar.gz -C clang
          
 #      - name: 📂 Checkout builder's sourcecode and get files
