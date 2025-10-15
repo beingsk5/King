@@ -104,7 +104,7 @@ jobs:
           cp -v out/arch/arm64/boot/Image anykernel/
 
           mkdir -p anykernel/modules
-          rsync -av --include='*.ko' --exclude='*' out/lib/modules/$(uname -r)/ anykernel/modules/
+          find out/ -type f -name "*.ko" -exec cp -v {} anykernel/modules/ ;
 
           cat <<'EOF' > anykernel/loader.sh
           #!/system/bin/sh
