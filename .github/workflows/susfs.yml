@@ -1,0 +1,57 @@
+name: Apply SUSFS for Kernel 4.14
+
+on:
+  workflow_call:
+
+jobs:
+  apply_susfs:
+    runs-on: ubuntu-latest
+    env:
+      KERNEL_PATH: kernel
+      SUSFS_REPO: https://gitlab.com/simonpunk/susfs4ksu.git
+      SUSFS_BRANCH: kernel-4.14
+    steps:
+      - name: Checkout Kernel Source
+        uses: actions/checkout@v3
+        with:
+          path: ${{ env.KERNEL_PATH }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git patch
+
+      - name: Clone SUSFS repo
+        run: |
+          rm -rf susfs4ksu
+          git clone --depth=1 --branch $SUSFS_BRANCH $SUSFS_REPO susfs4ksu
+
+      - name: Copy patches to kernel
+        run: |
+          cp susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch $KERNEL_PATH/KernelSU/ || true
+          cp susfs4ksu/kernel_patches/50_add_susfs_in_kernel-*.patch $KERNEL_PATH/ || true
+          cp -r susfs4ksu/kernel_patches/fs/* $KERNEL_PATH/fs/ || true
+          cp -r susfs4ksu/kernel_patches/include/linux/* $KERNEL_PATH/include/linux/ || true
+
+      - name: Apply KernelSU patch
+        run: |
+          cd $KERNEL_PATH/KernelSU
+          patch -p1 --forward --silent < 10_enable_susfs_for_ksu.patch || echo "KernelSU patch already applied, skipping."
+
+      - name: Apply main SUSFS patch
+        run: |
+          cd $KERNEL_PATH
+          for patchfile in 50_add_susfs_in_kernel-*.patch; do
+            patch -p1 --forward --silent < "$patchfile" || echo "$patchfile already applied, skipping."
+          done
+
+      - name: Enable CONFIG_KSU options
+        run: |
+          cd $KERNEL_PATH
+          if [ ! -f .config ]; then
+            make ARCH=arm64 lineage_sm8150_defconfig
+          fi
+          scripts/config --enable CONFIG_KSU
+          scripts/config --enable CONFIG_KSU_SUSFS
+          scripts/config --enable CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT || true
+          yes "" | make oldconfig
