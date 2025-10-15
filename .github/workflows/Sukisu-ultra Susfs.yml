@@ -1,4 +1,4 @@
-name: Build SukiSU-Ultra for OnePlus-7-Series
+name: SUSfs SukiSU-Ultra for OnePlus-7-Series
 
 on:
   push:
