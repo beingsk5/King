@@ -93,7 +93,7 @@ jobs:
           export TARGET_PRODUCT=msmnile
           cd kernel
           make $KERNEL_CMDLINE CC="ccache clang" $KERNEL_DEFCONFIG
-          make $KERNEL_CMDLINE CC="ccache clang" Image -j$(nproc --all)
+          make $KERNEL_CMDLINE CC="ccache clang" Image modules -j$(nproc --all)
           
       - name: 🚀 Copy the compiled kernel to AnyKernel3 then create the zip
         run: |
