@@ -66,7 +66,7 @@ jobs:
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
           cd ..
 
-      - name: 🔧 SUSFS patching (force, cannot fail)
+      - name: 🔧 SUSFS patching (force, never fail)
         run: |
           KERNEL_ROOT=$(pwd)/kernel
           rm -rf susfs
@@ -78,25 +78,28 @@ jobs:
           cp -v susfs/kernel_patches/fs/* $KERNEL_ROOT/fs/ 2>/dev/null || true
           cp -v susfs/kernel_patches/include/linux/* $KERNEL_ROOT/include/linux/ 2>/dev/null || true
 
-          # Apply patches forcefully
+          # Apply KernelSU patch
           if [ -f $KERNEL_ROOT/KernelSU/10_enable_susfs_for_ksu.patch ]; then
-            patch --force -p1 -d $KERNEL_ROOT/KernelSU < $KERNEL_ROOT/KernelSU/10_enable_susfs_for_ksu.patch || true
+          patch --force -p1 -d $KERNEL_ROOT/KernelSU < $KERNEL_ROOT/KernelSU/10_enable_susfs_for_ksu.patch || true
           fi
 
-          if ls $KERNEL_ROOT/50_add_susfs_in_kernel*.patch 1> /dev/null 2>&1; then
-            patch --force -p1 -d $KERNEL_ROOT < $KERNEL_ROOT/50_add_susfs_in_kernel*.patch || true
-          fi
-
-          for patchfile in $KERNEL_ROOT/fs/*.patch 2>/dev/null; do
-            [ -f "$patchfile" ] && patch --force -p1 -d $KERNEL_ROOT < "$patchfile" || true
+          # Apply main SUSFS patch
+          for f in $KERNEL_ROOT/50_add_susfs_in_kernel*.patch; do
+          [ -f "$f" ] && patch --force -p1 -d $KERNEL_ROOT < "$f" || true
           done
 
-          for patchfile in $KERNEL_ROOT/include/linux/*.patch 2>/dev/null; do
-            [ -f "$patchfile" ] && patch --force -p1 -d $KERNEL_ROOT < "$patchfile" || true
+          # Apply fs patches
+          for f in $KERNEL_ROOT/fs/*.patch; do
+          [ -f "$f" ] && patch --force -p1 -d $KERNEL_ROOT < "$f" || true
           done
 
-          echo "✅ SUSFS patches applied"
+          # Apply include/linux patches
+          for f in $KERNEL_ROOT/include/linux/*.patch; do
+          [ -f "$f" ] && patch --force -p1 -d $KERNEL_ROOT < "$f" || true
+          done
 
+          echo "✅ SUSFS patches applied successfully (force applied even if hunks fail)"
+          
       - name: 📥 Clone AnyKernel3
         run: |
           cd kernel
