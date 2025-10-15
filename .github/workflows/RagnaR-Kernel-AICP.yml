@@ -99,7 +99,21 @@ jobs:
         run: |
           cd kernel
           ZIP_NAME="RagnaR-Kernel-${DEVICE_CODENAME}-${KERNEL_VERSION}-$(date +%d%m%Y).zip"
-          cp -v out/arch/arm64/boot/Image anykernel/ && cp -v out/lib/modules/$(uname -r)/*.ko anykernel/modules/
+          cp -v out/arch/arm64/boot/Image anykernel/ && find out/lib/modules/$(uname -r) -name "*.ko" -exec cp -v {} anykernel/modules/ ;
+        
+          cat <<'EOF' > anykernel/loader.sh
+          #!/system/bin/sh
+          for module in /modules/*.ko; do
+          insmod $module
+          done
+          EOF
+
+          chmod 755 anykernel/loader.sh
+
+          mkdir -p anykernel/init.d
+          cp anykernel/loader.sh anykernel/init.d/99loadmodules
+          chmod +x anykernel/init.d/99loadmodules
+          
           cd anykernel && zip -r9 $ZIP_NAME ./*
           mv $ZIP_NAME ../../
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
