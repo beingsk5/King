@@ -40,8 +40,8 @@ jobs:
           mkbootimg cpio device-tree-compiler git git-lfs openjdk-17-jdk-headless -y
           
           axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/7143812acf96c9af445b164656ae7f424a67a573/clang-r536225.tar.gz
-          mkdir clang && tar -zxvf clang-r536225.tar.gz -C clang
-
+          mkdir clang && tar -zxvf linux-x86-7143812acf96c9af445b164656ae7f424a67a573-clang-r536225.tar.gz -C clang
+          
       - name: ⚡ Checkout kernel source
         run: |
           rm -rf kernel
