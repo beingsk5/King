@@ -64,7 +64,10 @@ jobs:
           patch -p1 < path_umount.patch
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
           cd ..
-          
+
+      - name: Apply SUSFS patches
+        uses: ./.github/workflows/susfs.yml
+        
       - name: 📥 Clone AnyKernel3
         run: |
           cd kernel
