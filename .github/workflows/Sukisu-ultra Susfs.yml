@@ -1,4 +1,4 @@
-name: SUSfs SukiSU-Ultra for OnePlus-7-Series
+name: Susfs SukiSU-Ultra for OnePlus-7-Series
 
 on:
   push:
@@ -19,62 +19,86 @@ jobs:
       CCACHE_NOHASHDIR: "true"
       CCACHE_MAXSIZE: "7G"
       CCACHE_HARDLINK: "true"
-      
+
     steps:
       - name: 🚀 Enable ccache to speed the build up
         uses: hendrikmuhs/ccache-action@v1.2
 
       - name: Remove unnecessary files
         run: |
-         sudo rm -rf /opt/ghc
-         sudo rm -rf "/usr/local/share/boost"
-         sudo rm -rf /usr/share/dotnet
-         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
       - name: Install dependencies
         run: |
-         sudo apt-get update -y 
-         sudo apt install gcc-aarch64-linux-gnu -y
-         sudo apt install gcc-arm-linux-gnueabi -y
-         sudo apt install clang-18 -y
-         sudo apt install libelf-dev libarchive-tools lld llvm axel binutils make python3 libssl-dev build-essential bc bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs -y
-         sudo apt install openjdk-17-jdk-headless -y
-         
-         axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/7143812acf96c9af445b164656ae7f424a67a573/clang-r536225.tar.gz
-         mkdir clang && tar -zxvf linux-x86-7143812acf96c9af445b164656ae7f424a67a573-clang-r536225.tar.gz -C clang
+          sudo apt-get update -y 
+          sudo apt install gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi clang-18 \
+          libelf-dev libarchive-tools lld llvm axel binutils make python3 \
+          libssl-dev build-essential bc bison flex unzip ca-certificates xz-utils \
+          mkbootimg cpio device-tree-compiler git git-lfs -y
+          sudo apt install openjdk-17-jdk-headless -y
 
-      - name: ⚡ Checkout kernel's sourcecode and clone submodules
+          # Download and extract clang
+          axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/7143812acf96c9af445b164656ae7f424a67a573/clang-r536225.tar.gz
+          mkdir clang
+          tar -zxvf linux-x86-7143812acf96c9af445b164656ae7f424a67a573-clang-r536225.tar.gz -C clang
+
+      - name: ⚡ Checkout kernel's sourcecode
         run: |
           rm -rf kernel
           git clone --recurse-submodules --depth=1 https://github.com/beingsk5/aicp_kernel_oneplus_sm8150 kernel -b v15.0
 
       - name: Add Re:binder support
         run: |
-         export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
-         cd kernel
-         wget https://github.com/Sakion-Team/Re-Kernel/releases/download/modifier/Kernel-Modifier-v4.0.jar
-         /usr/lib/jvm/java-17-openjdk-amd64/bin/java -jar ./Kernel-Modifier-v4.0.jar
-         cd ..
+          export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
+          cd kernel
+          wget https://github.com/Sakion-Team/Re-Kernel/releases/download/modifier/Kernel-Modifier-v4.0.jar
+          /usr/lib/jvm/java-17-openjdk-amd64/bin/java -jar ./Kernel-Modifier-v4.0.jar
+          cd ..
 
       - name: 📅 Export date of build
-        run: |
-          echo "DATE=$(date +%d%m%Y)" >> $GITHUB_ENV
+        run: echo "DATE=$(date +%d%m%Y)" >> $GITHUB_ENV
 
-      - name: 🔄 Update KernelSU-Next
+      - name: 🔄 Apply KernelSU
         run: |
-          cd kernel 
-          patch --force -p1 < kernelsu.patch
-          patch -p1 < path_umount.patch
+          cd kernel
+          patch --force -p1 < kernelsu.patch || true
+          patch -p1 < path_umount.patch || true
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
           cd ..
 
-      - name: 🔧 Apply SUSFS patches (force, never fail)
+      - name: 🔄 Clone SUSFS repo and apply patches
         run: |
-          cd kernel
-          for patch in ../kernel_patches/50_add_susfs*.patch ../kernel_patches/fs/*.patch ../kernel_patches/include/linux/*.patch; do
-              patch --force -p1 < "$patch" || true
+          KERNEL_ROOT=$(pwd)/kernel
+
+          # Clone SUSFS for kernel 4.14
+          rm -rf susfs
+          git clone --branch kernel-4.14 --depth=1 https://gitlab.com/simonpunk/susfs4ksu.git susfs
+
+          # Copy kernel patches
+          cp susfs/kernel_patches/10_enable_susfs_for_ksu.patch $KERNEL_ROOT/KernelSU/ || true
+          cp susfs/kernel_patches/50_add_susfs_in_kernel-*.patch $KERNEL_ROOT/ || true
+          cp susfs/kernel_patches/fs/* $KERNEL_ROOT/fs/ || true
+          cp susfs/kernel_patches/include/linux/* $KERNEL_ROOT/include/linux/ || true
+
+          # Apply patches with force
+          if [ -d "$KERNEL_ROOT/KernelSU" ]; then
+              patch --force -p1 -d $KERNEL_ROOT/KernelSU < $KERNEL_ROOT/KernelSU/10_enable_susfs_for_ksu.patch || true
+          fi
+
+          for patch in $KERNEL_ROOT/50_add_susfs_in_kernel-*.patch; do
+              patch --force -p1 -d $KERNEL_ROOT < "$patch" || true
           done
-          cd ..
+
+          for patch in $KERNEL_ROOT/fs/*.patch; do
+              patch --force -p1 -d $KERNEL_ROOT < "$patch" || true
+          done
+
+          for patch in $KERNEL_ROOT/include/linux/*.patch; do
+              patch --force -p1 -d $KERNEL_ROOT < "$patch" || true
+          done
 
       - name: 📥 Clone AnyKernel3
         run: |
@@ -82,7 +106,7 @@ jobs:
           git clone -b master --depth=1 https://github.com/beingsk5/AnyKernel3.git anykernel
           rm -rf anykernel/.git
 
-      - name: 🔍 Device's codename and kernel's version
+      - name: 🔍 Device codename and kernel version
         run: |
           cd kernel
           DEVICE_CODENAME=OnePlus-7-Series
@@ -107,7 +131,7 @@ jobs:
           make $KERNEL_CMDLINE CC="ccache clang" $KERNEL_DEFCONFIG
           make $KERNEL_CMDLINE CC="ccache clang" Image -j$(nproc --all)
 
-      - name: 🚀 Copy the compiled kernel to AnyKernel3 then create the zip
+      - name: 🚀 Package kernel in AnyKernel3 zip
         run: |
           cd kernel
           ZIP_NAME="RagnaR-Kernel-${DEVICE_CODENAME}-${KERNEL_VERSION}-$(date +%d%m%Y).zip"
@@ -116,14 +140,14 @@ jobs:
           mv $ZIP_NAME ../../
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
-      - name: 🤌 Copy zip file to get 2 different zip files
+      - name: 🤌 Duplicate zip
         run: |
           ZIP_ALTERNATIVE="SukiSU-Ultra-AICP-RagnaR-${DEVICE_CODENAME}-latest.zip"
           cp ${ZIP_NAME} $ZIP_ALTERNATIVE
           echo "Copied ${ZIP_NAME} as $ZIP_ALTERNATIVE"
           echo "ZIP_ALTERNATIVE=$ZIP_ALTERNATIVE" >> $GITHUB_ENV
 
-      - name: 📤 Publish github release
+      - name: 📤 Publish GitHub release (latest)
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.ZIP_ALTERNATIVE }}
@@ -134,7 +158,7 @@ jobs:
             Device: Oneplus 7 Series All Device Supported
             Target: AICP A15
 
-      - name: 📤 Publish with tag associated to the kernel and the date
+      - name: 📤 Publish GitHub release (dated)
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.ZIP_NAME }}
