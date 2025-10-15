@@ -99,7 +99,11 @@ jobs:
         run: |
           cd kernel
           ZIP_NAME="RagnaR-Kernel-${DEVICE_CODENAME}-${KERNEL_VERSION}-$(date +%d%m%Y).zip"
-          cp -v out/arch/arm64/boot/Image anykernel/ && find out/lib/modules/$(uname -r) -name "*.ko" -exec cp -v {} anykernel/modules/ ;
+          cp -v out/arch/arm64/boot/Image anykernel/
+          cd kernel
+          mkdir -p anykernel/modules
+          find out/lib/modules/$(uname -r) -name "*.ko" -exec cp -v {} anykernel/modules/ ;
+          cd kernel
         
           cat <<'EOF' > anykernel/loader.sh
           #!/system/bin/sh
