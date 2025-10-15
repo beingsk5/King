@@ -104,7 +104,10 @@ jobs:
           cp -v out/arch/arm64/boot/Image anykernel/
 
           mkdir -p anykernel/modules
-          find out/ -type f -name "*.ko" -exec cp -v {} anykernel/modules/ ;
+
+          find out/ -type f -name "*.ko" | while IFS= read -r module; do
+          cp -v "$module" anykernel/modules/
+          done
 
           cat <<'EOF' > anykernel/loader.sh
           #!/system/bin/sh
