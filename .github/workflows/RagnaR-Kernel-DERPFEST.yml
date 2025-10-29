@@ -60,7 +60,8 @@ jobs:
       - name: 🔄 Update KernelSU-Next
         run: |
           cd kernel 
-
+          patch -p1 < kernelsu.patch
+          patch -p1 < path_umount.patch
           curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
           cd ..
         
