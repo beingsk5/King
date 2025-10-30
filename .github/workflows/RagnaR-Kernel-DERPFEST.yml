@@ -109,19 +109,6 @@ jobs:
           cp -v "$module" anykernel/modules/
           done
 
-          cat <<'EOF' > anykernel/loader.sh
-          #!/system/bin/sh
-          for module in /modules/*.ko; do
-          insmod $module
-          done
-          EOF
-
-          chmod 755 anykernel/loader.sh
-
-          mkdir -p anykernel/init.d
-          cp anykernel/loader.sh anykernel/init.d/99loadmodules
-          chmod +x anykernel/init.d/99loadmodules
-
           cd anykernel && zip -r9 $ZIP_NAME ./*
 
           mv $ZIP_NAME ../../
@@ -130,7 +117,7 @@ jobs:
           
       - name: 🤌 Copy zip file to get 2 different zip files
         run: |
-          ZIP_ALTERNATIVE="SukiSU-Ultra-DERPFEST-RagnaR-${DEVICE_CODENAME}-latest.zip"
+          ZIP_ALTERNATIVE="KernelSu-Next-DERPFEST-RagnaR-${DEVICE_CODENAME}-latest.zip"
           cp ${ZIP_NAME} $ZIP_ALTERNATIVE
           echo "Copied ${ZIP_NAME} as $ZIP_ALTERNATIVE"
           echo "ZIP_ALTERNATIVE=$ZIP_ALTERNATIVE" >> $GITHUB_ENV
