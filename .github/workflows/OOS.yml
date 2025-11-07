@@ -34,7 +34,7 @@ jobs:
          sudo apt-get update -y 
          sudo apt install gcc-aarch64-linux-gnu -y
          sudo apt install gcc-arm-linux-gnueabi -y
-         sudo apt install clang-18 -y
+         sudo apt install binutils make python3 libssl-dev build-essential bc  bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs -y
          sudo apt install libelf-dev libarchive-tools lld llvm axel binutils make python3 libssl-dev build-essential bc  bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs -y
          sudo apt install openjdk-17-jdk-headless -y
          
@@ -92,18 +92,15 @@ jobs:
 
       - name: 🛠️ Build the kernel
         run: |
+          export PATH=$(pwd)/clang/bin/:$(pwd)/aarch64/bin/:$PATH
           export KERNEL_DEFCONFIG="vendor/sm8150-perf_defconfig"
           export KERNEL_CMDLINE="ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-androidkernel- CROSS_COMPILE_ARM32=arm-linux-gnueabi- LLVM=1 LLVM_IAS=1 O=out"
           # export KERNEL_CMDLINE="ARCH=arm64 CC=clang CROSS_COMPILE_COMPAT=aarch64-linux-android- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- READELF=llvm-readelf LLVM_DIS=llvm-dis AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip LLVM=1 LLVM_IAS=1 LD=ld.lld HOSTCC=gcc HOSTCXX=clang++ O=out"
-          export PATH=$(pwd)/clang/bin/:$(pwd)/aarch64/bin/:$PATH
           export ARCH=arm64
           export SUBARCH=arm64
-          export KBUILD_BUILD_USER="@beingsk5"
           export LD=ld.lld
           export BRAND_SHOW_FLAG=oneplus
           export TARGET_PRODUCT=msmnile
-          export HOSTCFLAGS="-Wno-misleading-indentation"
-          export KCFLAGS="-Wno-error -Wno-unused-but-set-variable -Wno-incompatible-pointer-types -Wno-implicit-function-declaration"
           cd kernel
           make $KERNEL_CMDLINE CC="ccache clang" $KERNEL_DEFCONFIG
           make $KERNEL_CMDLINE CC="ccache clang" -j$(nproc --all)
