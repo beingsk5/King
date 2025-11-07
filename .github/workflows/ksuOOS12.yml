@@ -45,7 +45,7 @@ jobs:
         git clone https://github.com/grm34/proton-clang -b ZenMaxBuilder clang --depth=1
         git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 aarch64 --depth=1
         git clone -b master --depth=1 https://github.com/beingsk5/AnyKernel3.git anykernel
-        rm -rf AnyKernel3/.git
+        rm -rf anykernel/.git
     - name: Get Version
       id: get_version
       run: |
