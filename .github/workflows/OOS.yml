@@ -41,7 +41,7 @@ jobs:
          # axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
          # mkdir clang && tar -zxvf linux-x86-refs_heads_main-clang-r547379.tar.gz -C clang
 
-         git clone https://github.com/grm34/proton-clang -b ZenMaxBuilder clang --depth=1
+         git clone https://github.com/beingsk5/Snapdragon-LLVM-ARM-Compiler-10.0.7-for-Android-NDK -b main clang --depth=1
          git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 aarch64 --depth=1
          
 #      - name: 📂 Checkout builder's sourcecode and get files
@@ -50,7 +50,7 @@ jobs:
       - name: ⚡ Checkout kernel's sourcecode and clone submodules
         run: |
           rm -rf kernel
-          git clone --recurse-submodules --depth=1 https://github.com/beingsk5/android_kernel_oneplus_sm8150 kernel -b 12.1
+          git clone --recurse-submodules --depth=1 https://github.com/beingsk5/android_kernel_oneplus_sm8150 kernel -b oneplus/sm8150_s_12.1_op7pro
       - name: Add Re:binder support
         run: |
          export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
