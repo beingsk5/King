@@ -90,7 +90,7 @@ jobs:
       - name: Patch missing Kconfig include
         run: |
           echo "Fixing missing Kconfig reference..."
-          sed -i 's|source "block/oplus_foreground_io_opt/Kconfig"|# removed missing include|g' block/Kconfig
+          sed -i 's|source "block/oplus_foreground_io_opt/Kconfig"|# removed missing include|g' kernel/block/Kconfig
     
       - name: 🛠️ Build the kernel
         run: |
