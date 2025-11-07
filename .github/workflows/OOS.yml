@@ -87,25 +87,10 @@ jobs:
 #        run: |
 #          chmod +x ./build.sh
 
-      - name: Patch kernel/block/Kconfig for Oplus feature
+      - name: Patch missing Kconfig include
         run: |
-          echo "🔧 Patching kernel/block/Kconfig for Oplus feature..."
-          if [ -f kernel/block/Kconfig ]; then
-            sed -i '/#ifdef OPLUS_FEATURE_FG_IO_OPT/,$!b;/#endif/d' kernel/block/Kconfig
-            sed -i '/#ifdef OPLUS_FEATURE_FG_IO_OPT/ i\
-          menu "Oplus performance features"\n\
-          config OPLUS_FEATURE_FG_IO_OPT\n\
-              bool "Oplus Foreground I/O Optimization"\n\
-              default y\n\
-              help\n\
-                Enables the Oplus I/O optimization feature if present.\n\
-          if OPLUS_FEATURE_FG_IO_OPT' kernel/block/Kconfig
-            sed -i '/source "block\/oplus_foreground_io_opt\/Kconfig"/ a\
-          endif\nendmenu' kernel/block/Kconfig
-          echo "✅ Kconfig patched successfully."
-          else
-          echo "⚠️  kernel/block/Kconfig not found, skipping patch."
-          fi
+          echo "Fixing missing Kconfig reference..."
+          sed -i 's|source "block/oplus_foreground_io_opt/Kconfig"|# removed missing include|g' block/Kconfig
     
       - name: 🛠️ Build the kernel
         run: |
