@@ -127,6 +127,8 @@ jobs:
           export PATH=$(pwd)/clang/bin/:$PATH
           export ARCH=arm64
           export SUBARCH=arm64
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          export LLVM_IAS=0
           export KBUILD_BUILD_USER="@beingsk5"
           export LD=ld.lld
           export BRAND_SHOW_FLAG=oneplus
