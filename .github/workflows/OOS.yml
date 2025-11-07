@@ -87,14 +87,25 @@ jobs:
 #        run: |
 #          chmod +x ./build.sh
 
-      - name: Patch missing Kconfig include
+      - name: 🧩 Fix all broken symbolic links before build
         run: |
-          echo "Fixing missing Kconfig reference..."
-          sed -i 's|source "block/oplus_foreground_io_opt/Kconfig"|# removed missing include|g' kernel/block/Kconfig
+          echo "🔍 Searching for broken symbolic links..."
+          cd kernel
 
-          rm -f kernel/block/oplus_foreground_io_opt
-          mkdir -p kernel/block/oplus_foreground_io_opt
-          touch kernel/block/oplus_foreground_io_opt/Kconfig
+          broken_links=$(find . -xtype l)
+          if [ -z "$broken_links" ]; then
+            echo "✅ No broken symlinks found."
+          else
+            echo "⚙️ Fixing broken symlinks..."
+            for link in $broken_links; do
+            echo "🧹 Removing broken link: $link"
+            rm -f "$link"
+            mkdir -p "$link"
+            echo '# Dummy placeholder for missing vendor link' > "$link/Kconfig"
+            echo 'obj-y :=' > "$link/Makefile"
+          done
+            echo "✅ All broken symlinks fixed."
+          fi
     
       - name: 🛠️ Build the kernel
         run: |
