@@ -91,6 +91,9 @@ jobs:
         run: |
           echo "Fixing missing Kconfig reference..."
           sed -i 's|source "block/oplus_foreground_io_opt/Kconfig"|# removed missing include|g' kernel/block/Kconfig
+
+          mkdir -p kernel/block/oplus_foreground_io_opt
+          touch kernel/block/oplus_foreground_io_opt/Kconfig
     
       - name: 🛠️ Build the kernel
         run: |
