@@ -38,9 +38,15 @@ jobs:
          sudo apt install libelf-dev libarchive-tools lld llvm axel binutils make python3 libssl-dev build-essential bc  bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs -y
          sudo apt install openjdk-17-jdk-headless -y
          
-         axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
-         mkdir clang && tar -zxvf linux-x86-refs_heads_main-clang-r547379.tar.gz -C clang
-         git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 aarch64 --depth=1
+         # axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
+         # mkdir clang && tar -zxvf linux-x86-refs_heads_main-clang-r547379.tar.gz -C clang
+         # git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 aarch64 --depth=1
+
+         mkdir -p "./toolchains/neutron-clang"
+         cd "./toolchains/neutron-clang"
+         curl -LO "https://raw.githubusercontent.com/Neutron-Toolchains/antman/main/antman"
+         chmod +x antman
+         ./antman --sync=latest
          
 #      - name: 📂 Checkout builder's sourcecode and get files
 #        uses: actions/checkout@v4
@@ -91,8 +97,9 @@ jobs:
       - name: 🛠️ Build the kernel
         run: |
           export KERNEL_DEFCONFIG="vendor/sm8150-perf_defconfig"
-          export KERNEL_CMDLINE="ARCH=arm64 CC=clang CROSS_COMPILE_COMPAT=aarch64-linux-android- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- READELF=llvm-readelf LLVM_DIS=llvm-dis AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip LLVM=1 LLVM_IAS=1 LD=ld.lld HOSTCC=gcc HOSTCXX=clang++ O=out"
-          export PATH=$(pwd)/clang/bin/:$(pwd)/aarch64/bin/:$PATH
+          export KERNEL_CMDLINE="ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip LLVM=1 LLVM_IAS=1 LD=ld.lld O=out"
+          # export KERNEL_CMDLINE="ARCH=arm64 CC=clang CROSS_COMPILE_COMPAT=aarch64-linux-android- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- READELF=llvm-readelf LLVM_DIS=llvm-dis AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip LLVM=1 LLVM_IAS=1 LD=ld.lld HOSTCC=gcc HOSTCXX=clang++ O=out"
+          export PATH=$(pwd)/toolchains/neutron-clang/bin/:$PATH
           export ARCH=arm64
           export SUBARCH=arm64
           export KBUILD_BUILD_USER="@beingsk5"
