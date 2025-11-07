@@ -87,16 +87,14 @@ jobs:
 #        run: |
 #          chmod +x ./build.sh
 
-      - name: 🧩 Fix all broken symbolic links before build
+      - name: 🧩 Fix all broken symlinks and missing Kconfig references
         run: |
-          echo "🔍 Searching for broken symbolic links..."
+          echo "🔍 Scanning for broken symlinks and missing Kconfig includes..."
           cd kernel
 
-          broken_links=$(find . -xtype l)
-          if [ -z "$broken_links" ]; then
-            echo "✅ No broken symlinks found."
-          else
-            echo "⚙️ Fixing broken symlinks..."
+          broken_links=$(find . -xtype l 2>/dev/null || true)
+          if [ -n "$broken_links" ]; then
+            echo "⚙️ Removing broken symlinks..."
             for link in $broken_links; do
             echo "🧹 Removing broken link: $link"
             rm -f "$link"
@@ -104,9 +102,24 @@ jobs:
             echo '# Dummy placeholder for missing vendor link' > "$link/Kconfig"
             echo 'obj-y :=' > "$link/Makefile"
           done
-            echo "✅ All broken symlinks fixed."
+            echo "✅ All broken symlinks replaced with dummy folders."
+          else
+           echo "✅ No broken symlinks found."
           fi
-    
+
+           echo "🔍 Commenting out Kconfig sources that point to missing files..."
+           find . -type f -name "Kconfig*" | while read -r file; do
+           grep -H 'source "' "$file" | while read -r line; do
+           include=$(echo "$line" | sed -n 's/.*source "\(.*\)".*/\1/p')
+          if [ -n "$include" ] && [ ! -f "$include" ]; then
+           echo "⚠️  Missing include in $file → $include"
+           sed -i "s|source \"$include\"|# removed missing include $include|g" "$file"
+          fi
+          done
+          done
+
+           echo "✅ All missing Kconfig includes commented out."
+
       - name: 🛠️ Build the kernel
         run: |
           export KERNEL_DEFCONFIG="vendor/sm8150-perf_defconfig"
