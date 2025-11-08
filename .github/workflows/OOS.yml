@@ -67,6 +67,7 @@ jobs:
           cd kernel 
           patch -p1 < kernelsu.patch
           patch -p1 < path_umount.patch
+          patch -p1 < gcc_wrapper.patch
           curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -
           cd ..
           
