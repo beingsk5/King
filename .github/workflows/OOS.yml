@@ -52,13 +52,15 @@ jobs:
         run: |
           rm -rf kernel
           git clone --recurse-submodules --depth=1 https://github.com/beingsk5/android_kernel_oneplus_sm8150 kernel -b oneplus/sm8150_s_12.1_op7pro
-      - name: Add Re:binder support
-        run: |
-         export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
-         cd kernel
-         wget https://github.com/Sakion-Team/Re-Kernel/releases/download/modifier/Kernel-Modifier-v4.0.jar
-         /usr/lib/jvm/java-17-openjdk-amd64/bin/java -jar ./Kernel-Modifier-v4.0.jar
-         cd ..
+
+#      - name: Add Re:binder support
+#        run: |
+#         export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
+#         cd kernel
+#         wget https://github.com/Sakion-Team/Re-Kernel/releases/download/modifier/Kernel-Modifier-v4.0.jar
+#         /usr/lib/jvm/java-17-openjdk-amd64/bin/java -jar ./Kernel-Modifier-v4.0.jar
+#         cd ..
+ 
       - name: 📅 Export date of build
         run: |
           echo "DATE=$(date +%d%m%Y)" >> $GITHUB_ENV
