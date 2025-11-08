@@ -41,8 +41,8 @@ jobs:
          # axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
          # mkdir clang && tar -zxvf linux-x86-refs_heads_main-clang-r547379.tar.gz -C clang
 
-         git clone https://github.com/beingsk5/Snapdragon-LLVM-ARM-Compiler-10.0.7-for-Android-NDK -b main clang --depth=1
-         git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 aarch64 --depth=1
+         # git clone https://github.com/beingsk5/Snapdragon-LLVM-ARM-Compiler-10.0.7-for-Android-NDK -b main clang --depth=1
+         # git clone https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 aarch64 --depth=1
          
 #      - name: 📂 Checkout builder's sourcecode and get files
 #        uses: actions/checkout@v4
@@ -86,26 +86,12 @@ jobs:
           echo "DEVICE_CODENAME=$DEVICE_CODENAME" >> $GITHUB_ENV
           echo "KERNEL_VERSION=$KERNEL_VERSION" >> $GITHUB_ENV
       
-#      - name: Make build.sh executable
-#        run: |
-#          chmod +x ./build.sh
-
-      - name: 🛠️ Build the kernel
+      - name: Build Kernel
         run: |
-          export PATH=$(pwd)/clang/bin/:$(pwd)/aarch64/bin/:$PATH
-          export KERNEL_DEFCONFIG="vendor/sm8150-perf_defconfig"
-          export KERNEL_CMDLINE="ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-androidkernel- CROSS_COMPILE_ARM32=arm-linux-gnueabi- LLVM=1 LLVM_IAS=1 O=out"
-          # export KERNEL_CMDLINE="ARCH=arm64 CC=clang CROSS_COMPILE_COMPAT=aarch64-linux-android- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- READELF=llvm-readelf LLVM_DIS=llvm-dis AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip LLVM=1 LLVM_IAS=1 LD=ld.lld HOSTCC=gcc HOSTCXX=clang++ O=out"
-          export ARCH=arm64
-          export SUBARCH=arm64
-          export LD=ld.lld
-          export BRAND_SHOW_FLAG=oneplus
-          export TARGET_PRODUCT=msmnile
           cd kernel
-          make $KERNEL_CMDLINE CC="ccache clang" $KERNEL_DEFCONFIG
-          make $KERNEL_CMDLINE CC="ccache clang" -j$(nproc --all)
-#          cp out/arch/arm64/boot/Image ../AnyKernel3
-#          cd ..
+          chmod +x build.sh
+          ./build.sh
+          echo "✅ Kernel build completed"
 
       - name: 🚀 Copy the compiled kernel to AnyKernel3 then create the zip
         run: |
