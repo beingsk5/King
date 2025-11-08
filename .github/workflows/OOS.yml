@@ -90,8 +90,8 @@ jobs:
       - name: Build Kernel
         run: |
           cd kernel
-          chmod +x build.sh
-          ./build.sh
+          chmod +x build_4.14.sh
+          ./build_4.14.sh
           echo "✅ Kernel build completed"
 
       - name: 🚀 Copy the compiled kernel to AnyKernel3 then create the zip
