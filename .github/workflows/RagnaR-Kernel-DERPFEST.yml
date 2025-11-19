@@ -62,7 +62,7 @@ jobs:
           cd kernel 
           patch -p1 < kernelsu.patch
           patch -p1 < path_umount.patch
-          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
+          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
           cd ..
 
       - name: Clone SUSFS (Stable Release Tag)
@@ -80,7 +80,7 @@ jobs:
 
           # 1) Copy kernelSU patch → KernelSU folder
           cp $SUSFS/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch \
-             $KERNEL_ROOT/KernelSU-Next/
+             $KERNEL_ROOT/SukiSU-Ultra/
 
           # 2) Copy kernel main patch → kernel root
           cp $SUSFS/kernel_patches/50_add_susfs_in_kernel-4.14.patch \
@@ -95,7 +95,7 @@ jobs:
              $KERNEL_ROOT/include/linux/
 
           echo "Patching KernelSU…"
-          cd $KERNEL_ROOT/KernelSU-Next
+          cd $KERNEL_ROOT/SukiSU-Ultra
           patch -p1 < 10_enable_susfs_for_ksu.patch || {
             echo "❌ KernelSU patch failed"
             exit 1
