@@ -3,10 +3,10 @@ name: Derpfest KSU for OnePlus-7-Series
 on:
   push:
     branches:
-      - jarvis
+      - main
   pull_request:
     branches:
-      - jarvis
+      - main
   workflow_dispatch:
 
 jobs:
@@ -64,6 +64,53 @@ jobs:
           patch -p1 < path_umount.patch
           curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
           cd ..
+
+      - name: Clone SUSFS (Stable Release Tag)
+        run: |
+          git clone --depth 1 --branch kernel-4.14 https://gitlab.com/simonpunk/susfs4ksu.git susfs4ksu
+
+      - name: Apply SUSFS Patches Automatically
+        run: |
+          set -e
+
+          KERNEL_ROOT="${GITHUB_WORKSPACE}/kernel"
+          SUSFS="${GITHUB_WORKSPACE}/susfs4ksu"
+
+          echo "Copying patch files…"
+
+          # 1) Copy kernelSU patch → KernelSU folder
+          cp $SUSFS/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch \
+             $KERNEL_ROOT/KernelSU/
+
+          # 2) Copy kernel main patch → kernel root
+          cp $SUSFS/kernel_patches/50_add_susfs_in_kernel-4.14.patch \
+             $KERNEL_ROOT/
+
+          # 3) Copy fs/ patches
+          cp $SUSFS/kernel_patches/fs/* \
+             $KERNEL_ROOT/fs/
+
+          # 4) Copy include/linux patches
+          cp $SUSFS/kernel_patches/include/linux/* \
+             $KERNEL_ROOT/include/linux/
+
+          echo "Patching KernelSU…"
+          cd $KERNEL_ROOT/KernelSU
+          patch -p1 < 10_enable_susfs_for_ksu.patch || {
+            echo "❌ KernelSU patch failed"
+            exit 1
+          }
+
+          echo "Patching kernel main patch…"
+          cd $KERNEL_ROOT
+          patch -p1 < 50_add_susfs_in_kernel-4.14.patch || {
+            echo "❌ Main SUSFS patch had failures!"
+            echo "You MUST manually fix conflicts!"
+            exit 1
+          }
+
+          echo "✅ SUSFS patching completed successfully!"
+
         
       - name: 📥 Clone AnyKernel3
         run: |
@@ -103,10 +150,17 @@ jobs:
 
           cp -v out/arch/arm64/boot/Image anykernel/
 
-          mkdir -p anykernel/modules
+          mkdir -p anykernel/modules/vendor/lib/modules/
 
           find out/ -type f -name "*.ko" | while IFS= read -r module; do
-          cp -v "$module" anykernel/modules/
+          filename=$(basename "$module")
+
+          if [ "$filename" = "wlan.ko" ]; then
+          echo "Renaming wlan.ko → qca_cld3_wlan.ko"
+          cp -v "$module" anykernel/modules/vendor/lib/modules/qca_cld3_wlan.ko
+          else
+          cp -v "$module" anykernel/modules/vendor/lib/modules/
+          fi
           done
 
           cd anykernel && zip -r9 $ZIP_NAME ./*
