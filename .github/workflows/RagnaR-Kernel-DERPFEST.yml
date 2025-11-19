@@ -95,7 +95,7 @@ jobs:
              $KERNEL_ROOT/include/linux/
 
           echo "Patching KernelSU…"
-          cd $KERNEL_ROOT/KernelSU
+          cd $KERNEL_ROOT/KernelSU-Next
           patch -p1 < 10_enable_susfs_for_ksu.patch || {
             echo "❌ KernelSU patch failed"
             exit 1
