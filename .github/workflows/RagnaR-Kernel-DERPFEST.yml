@@ -111,6 +111,18 @@ jobs:
 
           echo "✅ SUSFS patching completed successfully!"
 
+      - name: Collect .rej files
+        if: always()   
+        run: |
+          mkdir -p rej-files
+          find kernel -type f -name "*.rej" -exec cp --parents {} rej-files/ \; || true
+
+      - name: Upload reject artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patch-rejects
+          path: rej-files
         
       - name: 📥 Clone AnyKernel3
         run: |
