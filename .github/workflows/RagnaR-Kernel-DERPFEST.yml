@@ -84,8 +84,8 @@ jobs:
           echo "Copying patch files…"
 
           # 1) Copy kernelSU patch → KernelSU folder
-          cp $SUSFS/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch \
-             $KERNEL_ROOT/KernelSU/
+          # cp $SUSFS/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch \
+          #   $KERNEL_ROOT/KernelSU/
 
           # 2) Copy kernel main patch → kernel root
           cp $SUSFS/kernel_patches/50_add_susfs_in_kernel-4.14.patch \
@@ -100,8 +100,8 @@ jobs:
              $KERNEL_ROOT/include/linux/
 
           echo "Patching KernelSU…"
-          cd $KERNEL_ROOT/KernelSU
-          patch -p1 < 10_enable_susfs_for_ksu.patch || {
+          # cd $KERNEL_ROOT/KernelSU
+          # patch -p1 < 10_enable_susfs_for_ksu.patch || {
             echo "❌ KernelSU patch failed"
             # exit 1
           }
