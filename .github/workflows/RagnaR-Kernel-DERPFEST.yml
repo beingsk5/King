@@ -63,10 +63,11 @@ jobs:
           patch -p1 < kernelsu.patch
           patch -p1 < path_umount.patch
           # curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
-          git clone --depth=1 -b n3x7g3n-kernel https://github.com/sidex15/KernelSU-Next.git KernelSU-Next
-          cd KernelSU-Next/kernel
-          chmod +x setup.sh
-          ./setup.sh
+          curl -Ls "https://raw.githubusercontent.com/sidex15/KernelSU-Next/n3x7g3n-kernel/kernel/setup.sh" | bash -
+          # git clone --depth=1 -b n3x7g3n-kernel https://github.com/sidex15/KernelSU-Next.git KernelSU-Next
+          # cd KernelSU-Next/kernel
+          # chmod +x setup.sh
+          # ./setup.sh
           cd ..
 
       - name: Clone SUSFS (Stable Release Tag)
