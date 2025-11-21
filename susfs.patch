@@ -1093,7 +1093,7 @@ diff --git a/fs/proc/cmdline.c b/fs/proc/cmdline.c
 index 0000000..0000000 100644
 --- a/fs/proc/cmdline.c
 +++ b/fs/proc/cmdline.c
-@@ -1,6 +1,9 @@
+@@ -1,6 +1,10 @@
  // SPDX-License-Identifier: GPL-2.0
  #include <linux/fs.h>
  #include <linux/init.h>
@@ -1103,20 +1103,20 @@ index 0000000..0000000 100644
 +#ifdef CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG
 +extern int susfs_spoof_cmdline_or_bootconfig(struct seq_file *m);
 +#endif
- 
+
  static int cmdline_proc_show(struct seq_file *m, void *v)
  {
-@@ -8,7 +11,17 @@ static int cmdline_proc_show(struct seq_file *m, void *v)
--    seq_printf(m, "%s\n", saved_command_line);
+@@ -8,7 +12,17 @@ static int cmdline_proc_show(struct seq_file *m, void *v)
+-	seq_printf(m, "%s\n", saved_command_line);
 +#ifdef CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG
-+    /* If SUSFS spoofs cmdline/bootconfig, skip the original line */
-+    if (!susfs_spoof_cmdline_or_bootconfig(m)) {
-+        seq_putc(m, '\n');
-+        return 0;
-+    }
++	/* If SUSFS spoofs cmdline/bootconfig, skip original */
++	if (!susfs_spoof_cmdline_or_bootconfig(m)) {
++		seq_putc(m, '\n');
++		return 0;
++	}
 +#endif
-+    seq_printf(m, "%s\n", saved_command_line);
-     return 0;
++	seq_printf(m, "%s\n", saved_command_line);
+ 	return 0;
  }
 
 diff --git a/fs/proc/fd.c b/fs/proc/fd.c
