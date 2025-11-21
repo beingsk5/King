@@ -1,0 +1,22 @@
+From 306a91273545c139c695b5b928784991866e5f92 Mon Sep 17 00:00:00 2001
+From: sidex15 <24408329+sidex15@users.noreply.github.com>
+Date: Mon, 20 Oct 2025 13:57:10 +0800
+Subject: [PATCH] fs/task_mmu: add pkeys header
+
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+---
+ fs/proc/task_mmu.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fs/proc/task_mmu.c b/fs/proc/task_mmu.c
+index 1f83e3f852db..6e7446fe2802 100644
+--- a/fs/proc/task_mmu.c
++++ b/fs/proc/task_mmu.c
+@@ -20,6 +20,7 @@
+ #include <linux/uaccess.h>
+ #include <linux/mm_inline.h>
+ #include <linux/ctype.h>
++#include <linux/pkeys.h>
+ 
+ #include <asm/elf.h>
+ #include <asm/tlb.h>

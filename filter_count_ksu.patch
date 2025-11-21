@@ -1,0 +1,37 @@
+From 1f775dbf58e71c87266dd835f385238ba898c56e Mon Sep 17 00:00:00 2001
+From: Selfmuser <109387456+selfmusing@users.noreply.github.com>
+Date: Sun, 24 Aug 2025 16:04:27 +0530
+Subject: [PATCH] BACKPORT: seccomp: add filter_count field for KernelSU
+
+KernelSU requires struct seccomp to have atomic_t filter_count ,
+but this field is missing on NON-GKI kernels.
+
+Adding the field fixes build errors such as:
+error: no member named 'filter_count' in 'struct seccomp'
+
+Reference: https://github.com/tiann/KernelSU/pull/2708
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+---
+ include/linux/seccomp.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/linux/seccomp.h b/include/linux/seccomp.h
+index a9d5c52de4ea2..03c17f0a0e6ba 100644
+--- a/include/linux/seccomp.h
++++ b/include/linux/seccomp.h
+@@ -12,6 +12,7 @@
+ 
+ #include <linux/thread_info.h>
+ #include <asm/seccomp.h>
++#include <linux/atomic.h>
+ 
+ struct seccomp_filter;
+ /**
+@@ -28,6 +29,7 @@ struct seccomp_filter;
+ struct seccomp {
+ 	int mode;
+ 	struct seccomp_filter *filter;
++	atomic_t filter_count;
+ };
+ 
+ #ifdef CONFIG_HAVE_ARCH_SECCOMP_FILTER

@@ -1,0 +1,31 @@
+From fb2a0900a627bcc4b00bce6836d254282f75a7ba Mon Sep 17 00:00:00 2001
+From: Pranav Vashi <neobuddy89@gmail.com>
+Date: Thu, 6 Feb 2025 14:32:43 +0530
+Subject: [PATCH] drivers: Add KSU config path
+
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+---
+ drivers/Kconfig  | 2 ++
+ drivers/Makefile | 1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/drivers/Kconfig b/drivers/Kconfig
+index 81adf8e8f0111..3a5ee9264c582 100644
+--- a/drivers/Kconfig
++++ b/drivers/Kconfig
+@@ -229,4 +229,6 @@ source "drivers/esoc/Kconfig"
+ 
+ source "drivers/infrared_proximity/Kconfig"
+ 
++source "drivers/kernelsu/Kconfig"
++
+ endmenu
+diff --git a/drivers/Makefile b/drivers/Makefile
+index 1f7cb09b0f245..25d8534f138c6 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -193,3 +193,4 @@ obj-$(CONFIG_INFRARED_PROXIMITY)	+= infrared_proximity/
+ # GNSS driver
+ obj-$(CONFIG_GNSS_SIRF)		+= gnsssirf/
+ obj-$(CONFIG_GNSS)		+= gnss/
++obj-$(CONFIG_KSU) += kernelsu/
