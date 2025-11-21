@@ -1115,7 +1115,6 @@ index 0000000..0000000 100644
 +	seq_printf(m, "%s\n", saved_command_line);
  	return 0;
  }
-
 diff --git a/fs/proc/fd.c b/fs/proc/fd.c
 index 96fc70225e544..0762169d586c0 100644
 --- a/fs/proc/fd.c
