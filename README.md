@@ -25,4 +25,4 @@ For KernelSU side patches for this commit you need the sidex15's KernelSU-Next f
 https://github.com/sidex15/KernelSU-Next/tree/n3x7g3n-kernel
 
 Or if you want to patch on your own here's the commit patch of susfs in the KernelSU-Next:
-sidex15/KernelSU-Next@13b1dfd
+(sidex15/KernelSU-Next@13b1dfd) https://github.com/sidex15/KernelSU-Next/commit/13b1dfd6e2f1b7b353e774ad8dbc66012450d80f
