@@ -59,62 +59,39 @@ jobs:
    
       - name: 🔄 Update KernelSU-Next
         run: |
-          cd kernel 
-          patch -p1 < kernelsu.patch
-          patch -p1 < path_umount.patch
-          # curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
-          # curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-test
-          # git clone --depth=1 -b n3x7g3n-kernel https://github.com/sidex15/KernelSU-Next.git KernelSU-Next
-          # cd KernelSU-Next/kernel
-          # chmod +x setup.sh
-          # ./setup.sh
-          cd ..
+          # cd kernel 
+          git clone --depth=1 -b SUSfs https://github.com/beingsk5/King.git susfs
+          cp susfs/*.patch kernel/
 
-      - name: Clone SUSFS (Stable Release Tag)
-        run: |
-          git clone --depth 1 --branch kernel-4.14 https://gitlab.com/simonpunk/susfs4ksu.git susfs4ksu
+          cd kernel
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
 
-      - name: Apply SUSFS Patches Automatically
-        run: |
-          set -e
+          patches=(
+            "KSU_config_path.patch"
+            "filter_count_ksu.patch"
+            "get_cred_rcu_ksu.patch"
+            "path_umount_ksu.patch"
+            "manual_hooks_1.4.patch"
+            "seq_put_decimal_ull_width.patch"
+            "seq_put_hex_ll.patch"
+            "is_pid_wrappers.patch"
+            "mem_stats_gathering.patch"
+            "common_stats_printing.patch"
+            "single_value_seq_file.patch"
+            "empty_vma_pkey.patch"
+            "arch_pkeys_enabled.patch"
+            "pkeys_header.patch"
+            "split_PSS.patch"
+            "map_files.patch"
+            "susfs.patch"
+          )
 
-          KERNEL_ROOT="${GITHUB_WORKSPACE}/kernel"
-          SUSFS="${GITHUB_WORKSPACE}/susfs4ksu"
-
-          echo "Copying patch files…"
-
-          # 1) Copy kernelSU patch → KernelSU folder
-          # cp $SUSFS/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch \
-          #   $KERNEL_ROOT/KernelSU/
-
-          # 2) Copy kernel main patch → kernel root
-          cp $SUSFS/kernel_patches/50_add_susfs_in_kernel-4.14.patch \
-             $KERNEL_ROOT/
-
-          # 3) Copy fs/ patches
-          cp $SUSFS/kernel_patches/fs/* \
-             $KERNEL_ROOT/fs/
-
-          # 4) Copy include/linux patches
-          cp $SUSFS/kernel_patches/include/linux/* \
-             $KERNEL_ROOT/include/linux/
-
-          # echo "Patching KernelSU…"
-          # cd $KERNEL_ROOT/KernelSU
-          # patch -p1 < 10_enable_susfs_for_ksu.patch || {
-          # echo "❌ KernelSU patch failed"
-          # exit 1
-          # }
-
-          echo "Patching kernel main patch…"
-          cd $KERNEL_ROOT
-          patch -p1 < 50_add_susfs_in_kernel-4.14.patch || {
-            echo "❌ Main SUSFS patch had failures!"
-            echo "You MUST manually fix conflicts!"
-            # exit 1
-          }
-
-          echo "✅ SUSFS patching completed successfully!"
+          for patch in "${patches[@]}"; do
+            echo "Applying $patch"
+            git am "$patch" || (echo "::error ::FAILED: $patch" && exit 1)
+          done
+          # cd ..
 
       - name: Collect .rej files
         if: always()   
