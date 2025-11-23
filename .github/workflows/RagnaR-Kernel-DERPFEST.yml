@@ -69,7 +69,7 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
 
-           git am --3way --whitespace=nowarn KSU_config_path.patch
+           # git am --3way --whitespace=nowarn KSU_config_path.patch
            git am --3way --whitespace=nowarn filter_count_ksu.patch
            git am --3way --whitespace=nowarn get_cred_rcu_ksu.patch
            git am --3way --whitespace=nowarn path_umount_ksu.patch
