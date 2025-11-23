@@ -84,6 +84,7 @@ jobs:
            git am --3way --whitespace=nowarn pkeys_header.patch
            git am --3way --whitespace=nowarn split_PSS.patch
            git am --3way --whitespace=nowarn map_files.patch
+           git am --3way --whitespace=nowarn susfs_cmdline.patch
 
            echo "Applying final SUSFS patch with git apply (NOT git am)"
            git apply --reject --whitespace=nowarn susfs.patch
