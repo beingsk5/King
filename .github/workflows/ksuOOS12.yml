@@ -1,9 +1,9 @@
 name: Build OnePlus-Sm8150-Kernel-OOS12
 on:
   workflow_dispatch:
-  schedule:
+  # schedule:
       # Run once a week on Sunday at midnight. See http://crontab.guru
-      - cron: '0 21 * * *'
+    #  - cron: '0 21 * * *'
   push:
     branches:
       - main
