@@ -86,7 +86,6 @@ jobs:
            git am --3way --whitespace=nowarn map_files.patch
 
            echo "Applying final SUSFS patch with git apply (NOT git am)"
-           git apply --reject --whitespace=nowarn susfs_cmdline.patch
            git apply --reject --whitespace=nowarn susfs.patch
 
            echo "All patches applied."
