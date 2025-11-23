@@ -60,6 +60,7 @@ jobs:
       - name: 🔄 Update KernelSU-Next
         run: |
           # cd kernel 
+          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
           git clone --depth=1 -b SUSfs https://github.com/beingsk5/King.git susfs
           cp susfs/*.patch kernel/
 
