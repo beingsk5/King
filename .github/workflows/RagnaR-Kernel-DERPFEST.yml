@@ -61,7 +61,7 @@ jobs:
         run: |
           cd kernel/drivers || exit 1
           rm -rf kernelsu
-          cd kernel
+          cd ..
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s builtin
           
       - name: 🔄 Update KernelSU-Next
