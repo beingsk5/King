@@ -59,7 +59,7 @@ jobs:
 
       - name: Delete KernelSU directory & Import SukiSU-Ultra
         run: |
-          if [ -d "Kernel/drivers/kernelsu" ]; then
+          if [ -d "kernel/drivers/kernelsu" ]; then
             rm -rf kernel/drivers/kernelsu
             echo "Folder deleted"
           else
