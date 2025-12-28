@@ -59,12 +59,9 @@ jobs:
 
       - name: Delete KernelSU directory & Import SukiSU-Ultra
         run: |
-          if [ -d "kernel/drivers/kernelsu" ]; then
-            rm -rf kernel/drivers/kernelsu
-            echo "Folder deleted"
-          else
-            echo "Folder not found"
-          fi
+          cd kernel/drivers || exit 1
+          rm -rf kernelsu
+          cd kernel
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s builtin
           
       - name: 🔄 Update KernelSU-Next
