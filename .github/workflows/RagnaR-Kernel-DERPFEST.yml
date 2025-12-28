@@ -56,7 +56,17 @@ jobs:
       - name: 📅 Export date of build
         run: |
           echo "DATE=$(date +%d%m%Y)" >> $GITHUB_ENV
-   
+
+      - name: Delete KernelSU directory & Import SukiSU-Ultra
+        run: |
+          if [ -d "Kernel/drivers/kernelsu" ]; then
+            rm -rf Kernel/drivers/kernelsu
+            echo "Folder deleted"
+          else
+            echo "Folder not found"
+          fi
+          curl -LSs ‘https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh’ | bash -s builtin
+          
       - name: 🔄 Update KernelSU-Next
         run: |
           # cd kernel
