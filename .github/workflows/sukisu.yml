@@ -68,7 +68,7 @@ jobs:
           git clone --depth=1 -b SUSfs https://github.com/beingsk5/King.git susfs
           cp susfs/*.patch kernel/
 
-          # set -e
+          set -e
           cd kernel
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
@@ -91,7 +91,7 @@ jobs:
            # git am --3way --whitespace=nowarn map_files.patch
 
            echo "Applying final SUSFS patch with git apply (NOT git am)"
-           git apply --reject --whitespace=nowarn susfs.patch
+           # git apply --reject --whitespace=nowarn susfs.patch
 
            echo "All patches applied."
            cd ..
