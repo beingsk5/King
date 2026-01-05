@@ -1,0 +1,198 @@
+name: Derpfest KSU for OnePlus-7-Series
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env: 
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_MAXSIZE: "7G"
+      CCACHE_HARDLINK: "true"
+      
+    steps:
+      - name: 🚀 Enable ccache to speed the build up
+        uses: hendrikmuhs/ccache-action@v1.2
+      - name: Remove unnecessary files
+        run: |
+         sudo rm -rf /opt/ghc
+         sudo rm -rf "/usr/local/share/boost"
+         sudo rm -rf /usr/share/dotnet
+         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+      - name: Install dependencies
+        run: |
+         sudo apt-get update -y 
+         sudo apt install gcc-aarch64-linux-gnu -y
+         sudo apt install gcc-arm-linux-gnueabi -y
+         sudo apt install clang-18 -y
+         sudo apt install libelf-dev libarchive-tools lld llvm axel binutils make python3 libssl-dev build-essential bc  bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs -y
+         sudo apt install openjdk-17-jdk-headless -y
+         
+         axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
+         mkdir clang && tar -zxvf linux-x86-refs_heads_main-clang-r547379.tar.gz -C clang
+         
+        
+      - name: ⚡ Checkout kernel's sourcecode and clone submodules
+        run: |
+          rm -rf kernel
+          git clone --recurse-submodules --depth=1 https://github.com/beingsk5/android_kernel_oneplus_sm8150 kernel -b 16s
+      - name: Add Re:binder support
+        run: |
+         export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
+         cd kernel
+         wget https://github.com/Sakion-Team/Re-Kernel/releases/download/modifier/Kernel-Modifier-v4.0.jar
+         /usr/lib/jvm/java-17-openjdk-amd64/bin/java -jar ./Kernel-Modifier-v4.0.jar
+         cd ..
+      - name: 📅 Export date of build
+        run: |
+          echo "DATE=$(date +%d%m%Y)" >> $GITHUB_ENV
+
+      - name: Delete KernelSU directory & Import SukiSU-Ultra
+        run: |
+          cd kernel
+          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s builtin
+          
+      - name: 🔄 Update KernelSU-Next
+        run: |
+          # cd kernel
+          # git clone --depth=1 -b SUSfs https://github.com/beingsk5/King.git susfs
+          # cp susfs/*.patch kernel/
+
+          # set -e
+          # cd kernel
+          # git config user.email "actions@github.com"
+          # git config user.name "GitHub Actions"
+
+           # git am --3way --whitespace=nowarn KSU_config_path.patch
+           # git am --3way --whitespace=nowarn filter_count_ksu.patch
+           # git am --3way --whitespace=nowarn get_cred_rcu_ksu.patch
+           # git am --3way --whitespace=nowarn path_umount_ksu.patch
+           # git am --3way --whitespace=nowarn manual_hooks_1.4.patch
+           # git am --3way --whitespace=nowarn seq_put_decimal_ull_width.patch
+           # git am --3way --whitespace=nowarn seq_put_hex_ll.patch
+           # git am --3way --whitespace=nowarn is_pid_wrappers.patch
+           # git am --3way --whitespace=nowarn mem_stats_gathering.patch
+           # git am --3way --whitespace=nowarn common_stats_printing.patch
+           # git am --3way --whitespace=nowarn single_value_seq_file.patch
+           # git am --3way --whitespace=nowarn empty_vma_pkey.patch
+           # git am --3way --whitespace=nowarn arch_pkeys_enabled.patch
+           # git am --3way --whitespace=nowarn pkeys_header.patch
+           # git am --3way --whitespace=nowarn split_PSS.patch
+           # git am --3way --whitespace=nowarn map_files.patch
+
+           # echo "Applying final SUSFS patch with git apply (NOT git am)"
+           # git apply --reject --whitespace=nowarn susfs.patch
+
+           # echo "All patches applied."
+           # cd ..
+
+      - name: Collect .rej files
+        if: always()   
+        run: |
+          mkdir -p rej-files
+          find kernel -type f -name "*.rej" -exec cp --parents {} rej-files/ \; || true
+
+      - name: Upload reject artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patch-rejects
+          path: rej-files
+        
+      - name: 📥 Clone AnyKernel3
+        run: |
+          cd kernel
+          git clone -b master --depth=1 https://github.com/beingsk5/AnyKernel3.git anykernel
+          rm -rf anykernel/.git
+      - name: 🔍 Device's codename and kernel's version
+        run: |
+          cd kernel
+          DEVICE_CODENAME=OnePlus-7-Series
+          KERNEL_VERSION=$(make kernelversion)
+          echo "Device Codename: $DEVICE_CODENAME"
+          echo "Kernel Version: $KERNEL_VERSION"
+          echo "DEVICE_CODENAME=$DEVICE_CODENAME" >> $GITHUB_ENV
+          echo "KERNEL_VERSION=$KERNEL_VERSION" >> $GITHUB_ENV
+        
+      - name: 🛠️ Build the kernel
+        run: |
+          export KERNEL_DEFCONFIG="sm8150_defconfig"
+          export KERNEL_CMDLINE="ARCH=arm64 CC=clang CROSS_COMPILE_COMPAT=aarch64-linux-android- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- CLANG_TRIPLE=aarch64-linux-gnu- READELF=llvm-readelf LLVM_DIS=llvm-dis AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip LLVM=1 LLVM_IAS=1 LD=ld.lld HOSTCC=clang HOSTCXX=clang++ O=out"
+          export PATH=$(pwd)/clang/bin/:$PATH
+          export ARCH=arm64
+          export SUBARCH=arm64
+          export KBUILD_BUILD_USER="@beingsk5"
+          export LD=ld.lld
+          export BRAND_SHOW_FLAG=oneplus
+          export TARGET_PRODUCT=msmnile
+          cd kernel
+          make $KERNEL_CMDLINE CC="ccache clang" $KERNEL_DEFCONFIG
+          make $KERNEL_CMDLINE CC="ccache clang" Image modules -j$(nproc --all)
+          
+      - name: 🚀 Copy the compiled kernel to AnyKernel3 then create the zip
+        run: |
+          cd kernel
+
+          ZIP_NAME="RagnaR-Kernel-${DEVICE_CODENAME}-${KERNEL_VERSION}-$(date +%d%m%Y).zip"
+
+          cp -v out/arch/arm64/boot/Image anykernel/
+
+          mkdir -p anykernel/modules/vendor/lib/modules/
+
+          find out/ -type f -name "*.ko" | while IFS= read -r module; do
+          filename=$(basename "$module")
+
+          if [ "$filename" = "wlan.ko" ]; then
+          echo "Renaming wlan.ko → qca_cld3_wlan.ko"
+          cp -v "$module" anykernel/modules/vendor/lib/modules/qca_cld3_wlan.ko
+          else
+          cp -v "$module" anykernel/modules/vendor/lib/modules/
+          fi
+          done
+
+          cd anykernel && zip -r9 $ZIP_NAME ./*
+
+          mv $ZIP_NAME ../../
+
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+          
+      - name: 🤌 Copy zip file to get 2 different zip files
+        run: |
+          ZIP_ALTERNATIVE="KernelSu-Next-DERPFEST-RagnaR-${DEVICE_CODENAME}-latest.zip"
+          cp ${ZIP_NAME} $ZIP_ALTERNATIVE
+          echo "Copied ${ZIP_NAME} as $ZIP_ALTERNATIVE"
+          echo "ZIP_ALTERNATIVE=$ZIP_ALTERNATIVE" >> $GITHUB_ENV
+          
+      - name: 📤 Publish github release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ZIP_ALTERNATIVE }}
+          tag_name: "RagnaR-Kernel-latest"
+          draft: false
+          prerelease: false
+          body: |
+            Device: Oneplus 7 Series All Device Supported
+            Target: DERPFEST A16
+
+      - name: 📤 Publish with tag associated to the kernel and the date
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ZIP_NAME }}
+          tag_name: RagnaR-Kernel-${{ env.DATE }}
+          draft: false
+          prerelease: false
+          body: |
+            Device: Oneplus 7 Series All Device Supported
+            Target: DERPFEST A16
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
