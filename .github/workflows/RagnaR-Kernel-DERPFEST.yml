@@ -56,13 +56,6 @@ jobs:
       - name: 📅 Export date of build
         run: |
           echo "DATE=$(date +%d%m%Y)" >> $GITHUB_ENV
-
-      - name: Delete KernelSU directory & Import SukiSU-Ultra
-        run: |
-          cd kernel/drivers || exit 1
-          rm -rf kernelsu
-          cd ..
-          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s builtin
           
       - name: 🔄 Update KernelSU-Next
         run: |
@@ -75,7 +68,7 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
 
-           # git am --3way --whitespace=nowarn KSU_config_path.patch
+           git am --3way --whitespace=nowarn KSU_config_path.patch
            git am --3way --whitespace=nowarn filter_count_ksu.patch
            git am --3way --whitespace=nowarn get_cred_rcu_ksu.patch
            git am --3way --whitespace=nowarn path_umount_ksu.patch
