@@ -77,7 +77,7 @@ jobs:
            git am --3way --whitespace=nowarn filter_count_ksu.patch
            git am --3way --whitespace=nowarn get_cred_rcu_ksu.patch
            git am --3way --whitespace=nowarn path_umount_ksu.patch
-           git am --3way --whitespace=nowarn manual_hooks_1.4_sukisu.patch
+           git am --3way --whitespace=nowarn kernel-4.14.patch
            git am --3way --whitespace=nowarn seq_put_decimal_ull_width.patch
            git am --3way --whitespace=nowarn seq_put_hex_ll.patch
            git am --3way --whitespace=nowarn is_pid_wrappers.patch
