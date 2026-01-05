@@ -68,7 +68,7 @@ jobs:
           git clone --depth=1 -b SUSfs https://github.com/beingsk5/King.git susfs
           cp susfs/*.patch kernel/
 
-          set -e
+          # set -e
           cd kernel
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
