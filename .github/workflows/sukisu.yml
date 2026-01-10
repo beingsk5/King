@@ -74,22 +74,23 @@ jobs:
           git config user.name "GitHub Actions"
 
            # git am --3way --whitespace=nowarn KSU_config_path.patch
-           git am --3way --whitespace=nowarn filter_count_ksu.patch
-           git am --3way --whitespace=nowarn get_cred_rcu_ksu.patch
-           git am --3way --whitespace=nowarn path_umount_ksu.patch
-           git am --3way --whitespace=nowarn < manual_hooks_1.4.patch
-           git am --3way --whitespace=nowarn seq_put_decimal_ull_width.patch
-           git am --3way --whitespace=nowarn seq_put_hex_ll.patch
-           git am --3way --whitespace=nowarn is_pid_wrappers.patch
-           git am --3way --whitespace=nowarn mem_stats_gathering.patch
-           git am --3way --whitespace=nowarn common_stats_printing.patch
-           git am --3way --whitespace=nowarn single_value_seq_file.patch
-           git am --3way --whitespace=nowarn empty_vma_pkey.patch
-           git am --3way --whitespace=nowarn arch_pkeys_enabled.patch
-           git am --3way --whitespace=nowarn pkeys_header.patch
-           git am --3way --whitespace=nowarn split_PSS.patch
-           git am --3way --whitespace=nowarn map_files.patch
-
+           # git am --3way --whitespace=nowarn filter_count_ksu.patch
+           # git am --3way --whitespace=nowarn get_cred_rcu_ksu.patch
+           # git am --3way --whitespace=nowarn path_umount_ksu.patch
+           # git am --3way --whitespace=nowarn < manual_hooks_1.4.patch
+           # git am --3way --whitespace=nowarn seq_put_decimal_ull_width.patch
+           # git am --3way --whitespace=nowarn seq_put_hex_ll.patch
+           # git am --3way --whitespace=nowarn is_pid_wrappers.patch
+           # git am --3way --whitespace=nowarn mem_stats_gathering.patch
+           # git am --3way --whitespace=nowarn common_stats_printing.patch
+           # git am --3way --whitespace=nowarn single_value_seq_file.patch
+           # git am --3way --whitespace=nowarn empty_vma_pkey.patch
+           # git am --3way --whitespace=nowarn arch_pkeys_enabled.patch
+           # git am --3way --whitespace=nowarn pkeys_header.patch
+           # git am --3way --whitespace=nowarn split_PSS.patch
+           #git am --3way --whitespace=nowarn map_files.patch
+           patch -p1 < kernelsu_o.patch
+           patch -p1 < path_umount_o.patch
            # echo "Applying final SUSFS patch with git apply (NOT git am)"
            # git apply --reject --whitespace=nowarn susfs.patch
 
