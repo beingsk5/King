@@ -60,7 +60,7 @@ jobs:
       - name: Delete KernelSU directory & Import SukiSU-Ultra
         run: |
           cd kernel
-          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s builtin
+          # curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s builtin
           
       - name: 🔄 Update KernelSU-Next
         run: |
