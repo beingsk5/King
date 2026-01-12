@@ -64,15 +64,16 @@ jobs:
           
       - name: 🔄 Update KernelSU-Next
         run: |
-          # cd kernel
-          # git clone --depth=1 -b SUSfs https://github.com/beingsk5/King.git susfs
-          # cp susfs/*.patch kernel/
+          cd kernel
+          git clone --depth=1 -b SUSfs https://github.com/beingsk5/King.git susfs
+          cp susfs/*.patch kernel/
 
           # set -e
           # cd kernel
           # git config user.email "actions@github.com"
           # git config user.name "GitHub Actions"
 
+           patch -p1 < path_umount_o.patch
            # git am --3way --whitespace=nowarn KSU_config_path.patch
            # git am --3way --whitespace=nowarn filter_count_ksu.patch
            # git am --3way --whitespace=nowarn get_cred_rcu_ksu.patch
