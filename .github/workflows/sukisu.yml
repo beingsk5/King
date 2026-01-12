@@ -69,7 +69,7 @@ jobs:
           cp susfs/*.patch kernel/
 
           # set -e
-          # cd kernel
+          cd kernel
           # git config user.email "actions@github.com"
           # git config user.name "GitHub Actions"
 
