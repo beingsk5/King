@@ -1,0 +1,217 @@
+From 05f2634f94ee90e32f0f84d1da90aff318ccd5dc Mon Sep 17 00:00:00 2001
+From: freak07 <michalechner92@googlemail.com>
+Date: Sun, 27 Oct 2019 22:25:31 +0800
+Subject: [PATCH] power: supply: Use power efficient workingqueues
+
+Change-Id: I95fe331e2daa474f63d625a52064d7200c4917dc
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+---
+ drivers/power/supply/qcom/battery.c      | 10 +++++-----
+ drivers/power/supply/qcom/qpnp-fg-gen3.c | 20 ++++++++++----------
+ drivers/power/supply/qcom/smb-lib.c      | 14 +++++++-------
+ 3 files changed, 22 insertions(+), 22 deletions(-)
+
+diff --git a/drivers/power/supply/qcom/battery.c b/drivers/power/supply/qcom/battery.c
+index 0c6a11b6961a7..24183bdc81372 100644
+--- a/drivers/power/supply/qcom/battery.c
++++ b/drivers/power/supply/qcom/battery.c
+@@ -1193,7 +1193,7 @@ static void fcc_stepper_work(struct work_struct *work)
+ 	cp_configure_ilim(chip, FCC_VOTER, chip->slave_fcc_ua / 2);
+ 
+ 	if (reschedule_ms) {
+-		schedule_delayed_work(&chip->fcc_stepper_work,
++		queue_delayed_work(system_power_efficient_wq, &chip->fcc_stepper_work,
+ 				msecs_to_jiffies(reschedule_ms));
+ 		pr_debug("Rescheduling FCC_STEPPER work\n");
+ 		return;
+@@ -1310,7 +1310,7 @@ static int usb_icl_vote_callback(struct votable *votable, void *data,
+ 	if (icl_ua <= 1400000)
+ 		vote(chip->pl_enable_votable_indirect, USBIN_I_VOTER, false, 0);
+ 	else
+-		schedule_delayed_work(&chip->status_change_work,
++		queue_delayed_work(system_power_efficient_wq, &chip->status_change_work,
+ 						msecs_to_jiffies(PL_DELAY_MS));
+ 
+ 	/* rerun AICL */
+@@ -1447,7 +1447,7 @@ static int pl_disable_vote_callback(struct votable *votable,
+ 			if (chip->step_fcc) {
+ 				vote(chip->pl_awake_votable, FCC_STEPPER_VOTER,
+ 					true, 0);
+-				schedule_delayed_work(&chip->fcc_stepper_work,
++				queue_delayed_work(system_power_efficient_wq, &chip->fcc_stepper_work,
+ 					0);
+ 			}
+ 		} else {
+@@ -1564,7 +1564,7 @@ static int pl_disable_vote_callback(struct votable *votable,
+ 			if (chip->step_fcc) {
+ 				vote(chip->pl_awake_votable, FCC_STEPPER_VOTER,
+ 					true, 0);
+-				schedule_delayed_work(&chip->fcc_stepper_work,
++				queue_delayed_work(system_power_efficient_wq, &chip->fcc_stepper_work,
+ 					0);
+ 			}
+ 		}
+@@ -1911,7 +1911,7 @@ static int pl_notifier_call(struct notifier_block *nb,
+ 	if ((strcmp(psy->desc->name, "parallel") == 0)
+ 	    || (strcmp(psy->desc->name, "battery") == 0)
+ 	    || (strcmp(psy->desc->name, "main") == 0))
+-		schedule_delayed_work(&chip->status_change_work, 0);
++		queue_delayed_work(system_power_efficient_wq, &chip->status_change_work, 0);
+ 
+ 	return NOTIFY_OK;
+ }
+diff --git a/drivers/power/supply/qcom/qpnp-fg-gen3.c b/drivers/power/supply/qcom/qpnp-fg-gen3.c
+index 77a1dfd2c4ed0..ad81b998bc3a6 100644
+--- a/drivers/power/supply/qcom/qpnp-fg-gen3.c
++++ b/drivers/power/supply/qcom/qpnp-fg-gen3.c
+@@ -2233,7 +2233,7 @@ static void fg_ttf_update(struct fg_dev *fg)
+ 	chip->ttf.last_ttf = 0;
+ 	chip->ttf.last_ms = 0;
+ 	mutex_unlock(&chip->ttf.lock);
+-	schedule_delayed_work(&chip->ttf_work, msecs_to_jiffies(delay_ms));
++	queue_delayed_work(system_power_efficient_wq, &chip->ttf_work, msecs_to_jiffies(delay_ms));
+ }
+ 
+ static void restore_cycle_counter(struct fg_dev *fg)
+@@ -2901,7 +2901,7 @@ static void profile_load_work(struct work_struct *work)
+ out:
+ 	fg->soc_reporting_ready = true;
+ 	vote(fg->awake_votable, ESR_FCC_VOTER, true, 0);
+-	schedule_delayed_work(&chip->pl_enable_work, msecs_to_jiffies(5000));
++	queue_delayed_work(system_power_efficient_wq, &chip->pl_enable_work, msecs_to_jiffies(5000));
+ 	vote(fg->awake_votable, PROFILE_LOAD, false, 0);
+ 	if (!work_pending(&fg->status_change_work)) {
+ 		fg_stay_awake(fg, FG_STATUS_NOTIFY_WAKE);
+@@ -2934,7 +2934,7 @@ static void sram_dump_work(struct work_struct *work)
+ 	fg_dbg(fg, FG_STATUS, "SRAM Dump done at %lld.%d\n",
+ 		quotient, remainder);
+ resched:
+-	schedule_delayed_work(&fg->sram_dump_work,
++	queue_delayed_work(system_power_efficient_wq, &fg->sram_dump_work,
+ 			msecs_to_jiffies(fg_sram_dump_period_ms));
+ }
+ 
+@@ -2964,7 +2964,7 @@ static int fg_sram_dump_sysfs(const char *val, const struct kernel_param *kp)
+ 	chip = power_supply_get_drvdata(bms_psy);
+ 	fg = &chip->fg;
+ 	if (fg_sram_dump)
+-		schedule_delayed_work(&fg->sram_dump_work,
++		queue_delayed_work(system_power_efficient_wq, &fg->sram_dump_work,
+ 				msecs_to_jiffies(fg_sram_dump_period_ms));
+ 	else
+ 		cancel_delayed_work_sync(&fg->sram_dump_work);
+@@ -3541,7 +3541,7 @@ static void ttf_work(struct work_struct *work)
+ 		/* keep the wake lock and prime the IBATT and VBATT buffers */
+ 		if (ttf < 0) {
+ 			/* delay for one FG cycle */
+-			schedule_delayed_work(&chip->ttf_work,
++			queue_delayed_work(system_power_efficient_wq, &chip->ttf_work,
+ 							msecs_to_jiffies(1500));
+ 			mutex_unlock(&chip->ttf.lock);
+ 			return;
+@@ -3558,7 +3558,7 @@ static void ttf_work(struct work_struct *work)
+ 	}
+ 
+ 	/* recurse every 10 seconds */
+-	schedule_delayed_work(&chip->ttf_work, msecs_to_jiffies(10000));
++	queue_delayed_work(system_power_efficient_wq, &chip->ttf_work, msecs_to_jiffies(10000));
+ end_work:
+ 	vote(fg->awake_votable, TTF_PRIMING, false, 0);
+ 	mutex_unlock(&chip->ttf.lock);
+@@ -4333,7 +4333,7 @@ static irqreturn_t fg_batt_missing_irq_handler(int irq, void *data)
+ 	}
+ 
+ 	clear_battery_profile(fg);
+-	schedule_delayed_work(&fg->profile_load_work, 0);
++	queue_delayed_work(system_power_efficient_wq, &fg->profile_load_work, 0);
+ 
+ 	if (fg->fg_psy)
+ 		power_supply_changed(fg->fg_psy);
+@@ -5347,7 +5347,7 @@ static int fg_gen3_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	device_init_wakeup(fg->dev, true);
+-	schedule_delayed_work(&fg->profile_load_work, 0);
++	queue_delayed_work(system_power_efficient_wq, &fg->profile_load_work, 0);
+ 
+ 	pr_debug("FG GEN3 driver probed successfully\n");
+ 	return 0;
+@@ -5386,9 +5386,9 @@ static int fg_gen3_resume(struct device *dev)
+ 	if (rc < 0)
+ 		pr_err("Error in configuring ESR timer, rc=%d\n", rc);
+ 
+-	schedule_delayed_work(&chip->ttf_work, 0);
++	queue_delayed_work(system_power_efficient_wq, &chip->ttf_work, 0);
+ 	if (fg_sram_dump)
+-		schedule_delayed_work(&fg->sram_dump_work,
++		queue_delayed_work(system_power_efficient_wq, &fg->sram_dump_work,
+ 				msecs_to_jiffies(fg_sram_dump_period_ms));
+ 
+ 	if (!work_pending(&fg->status_change_work)) {
+diff --git a/drivers/power/supply/qcom/smb-lib.c b/drivers/power/supply/qcom/smb-lib.c
+index a8678bf9fb683..efbab8a687bd8 100644
+--- a/drivers/power/supply/qcom/smb-lib.c
++++ b/drivers/power/supply/qcom/smb-lib.c
+@@ -3671,7 +3671,7 @@ void smblib_usb_plugin_locked(struct smb_charger *chg)
+ 
+ 		/* Schedule work to enable parallel charger */
+ 		vote(chg->awake_votable, PL_DELAY_VOTER, true, 0);
+-		schedule_delayed_work(&chg->pl_enable_work,
++		queue_delayed_work(system_power_efficient_wq, &chg->pl_enable_work,
+ 					msecs_to_jiffies(PL_DELAY_MS));
+ 		/* vbus rising when APSD was disabled and PD_ACTIVE = 0 */
+ 		if (get_effective_result(chg->apsd_disable_votable) &&
+@@ -3753,7 +3753,7 @@ irqreturn_t smblib_handle_icl_change(int irq, void *data)
+ 			delay = 0;
+ 
+ 		cancel_delayed_work_sync(&chg->icl_change_work);
+-		schedule_delayed_work(&chg->icl_change_work,
++		queue_delayed_work(system_power_efficient_wq, &chg->icl_change_work,
+ 						msecs_to_jiffies(delay));
+ 	}
+ 
+@@ -4063,7 +4063,7 @@ static void smblib_handle_apsd_done(struct smb_charger *chg, bool rising)
+ 		break;
+ 	case DCP_CHARGER_BIT:
+ 		if (chg->wa_flags & QC_CHARGER_DETECTION_WA_BIT)
+-			schedule_delayed_work(&chg->hvdcp_detect_work,
++			queue_delayed_work(system_power_efficient_wq, &chg->hvdcp_detect_work,
+ 					      msecs_to_jiffies(HVDCP_DET_MS));
+ 		break;
+ 	default:
+@@ -4636,7 +4636,7 @@ irqreturn_t smblib_handle_usb_typec_change(int irq, void *data)
+ 		cancel_delayed_work_sync(&chg->uusb_otg_work);
+ 		vote(chg->awake_votable, OTG_DELAY_VOTER, true, 0);
+ 		smblib_dbg(chg, PR_INTERRUPT, "Scheduling OTG work\n");
+-		schedule_delayed_work(&chg->uusb_otg_work,
++		queue_delayed_work(system_power_efficient_wq, &chg->uusb_otg_work,
+ 				msecs_to_jiffies(chg->otg_delay_ms));
+ 		return IRQ_HANDLED;
+ 	}
+@@ -4684,7 +4684,7 @@ irqreturn_t smblib_handle_high_duty_cycle(int irq, void *data)
+ 	if (chg->irq_info[HIGH_DUTY_CYCLE_IRQ].irq)
+ 		disable_irq_nosync(chg->irq_info[HIGH_DUTY_CYCLE_IRQ].irq);
+ 
+-	schedule_delayed_work(&chg->clear_hdc_work, msecs_to_jiffies(60));
++	queue_delayed_work(system_power_efficient_wq, &chg->clear_hdc_work, msecs_to_jiffies(60));
+ 
+ 	return IRQ_HANDLED;
+ }
+@@ -4750,7 +4750,7 @@ irqreturn_t smblib_handle_switcher_power_ok(int irq, void *data)
+ 			 * permanently suspending the input if the boost-back
+ 			 * condition is unintentionally hit.
+ 			 */
+-			schedule_delayed_work(&chg->bb_removal_work,
++			queue_delayed_work(system_power_efficient_wq, &chg->bb_removal_work,
+ 				msecs_to_jiffies(BOOST_BACK_UNVOTE_DELAY_MS));
+ 		}
+ 	}
+@@ -4991,7 +4991,7 @@ static void smblib_otg_oc_work(struct work_struct *work)
+ 	 * triggered then it is likely that the software based soft start was
+ 	 * successful and the VBUS < 1V restriction should be re-enabled.
+ 	 */
+-	schedule_delayed_work(&chg->otg_ss_done_work, msecs_to_jiffies(500));
++	queue_delayed_work(system_power_efficient_wq, &chg->otg_ss_done_work, msecs_to_jiffies(500));
+ 
+ 	rc = _smblib_vbus_regulator_disable(chg->vbus_vreg->rdev);
+ 	if (rc < 0) {

@@ -1,0 +1,34 @@
+From 46671c350bee5c09240b5b21f3b93a3d6d66f994 Mon Sep 17 00:00:00 2001
+From: Danny Lin <danny@kdrag0n.dev>
+Date: Wed, 18 Nov 2020 17:49:13 -0800
+Subject: [PATCH] power: Silence debug logging if logbuffer is disabled
+
+If logbuffer is disabled, we want to silence logging, not dump it to
+kmsg.
+
+Signed-off-by: Danny Lin <danny@kdrag0n.dev>
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+---
+ drivers/power/supply/qcom/smb-lib.c | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
+
+diff --git a/drivers/power/supply/qcom/smb-lib.c b/drivers/power/supply/qcom/smb-lib.c
+index 0cf5da02a55ba..a8678bf9fb683 100644
+--- a/drivers/power/supply/qcom/smb-lib.c
++++ b/drivers/power/supply/qcom/smb-lib.c
+@@ -30,14 +30,7 @@
+ 		__func__, ##__VA_ARGS__)	\
+ 
+ #define smblib_dbg(chg, reason, fmt, ...)			\
+-	do {							\
+-		if (*chg->debug_mask & (reason))		\
+-			pr_info("%s: %s: " fmt, chg->name,	\
+-				__func__, ##__VA_ARGS__);	\
+-		else						\
+-			pr_debug("%s: %s: " fmt, chg->name,	\
+-				__func__, ##__VA_ARGS__);	\
+-	} while (0)
++	do { } while (0)
+ 
+ static bool is_secure(struct smb_charger *chg, int addr)
+ {

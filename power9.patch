@@ -1,0 +1,45 @@
+From 9429d7ddcf786b152a5d6ca2fec2a4a9aca8123d Mon Sep 17 00:00:00 2001
+From: "jonghyun26.kim" <jonghyun26.kim@lge.com>
+Date: Mon, 24 Jul 2017 15:39:48 -0700
+Subject: [PATCH] power_supply: Fix unbalanced the power supplies
+
+If a driver invokes multiple power_supply_register(), the each supply
+will not be saved in the supplied_from[] with the correct index.
+
+supplied_from[0] = "dc"
+num_supplies = 1;
+
+supplied_from[0] = "usb"
+num_supplies = 2;
+
+supplied_from[0] = "battery"
+num_supplies = 3;
+...
+
+It results in NPE when iterating the supplied_from[] with num_supplies on
+__power_supply_is_supplied_by()
+
+Bug: 63785418
+Change-Id: Ifd14ca7c6e2df247e1090e4fa8d8c66bd2912180
+Signed-off-by; Devin Kim <dojip.kim@lge.com>
+Signed-off-by: Steve Pfetsch <spfetsch@google.com>
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+---
+ drivers/power/supply/power_supply_core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/power/supply/power_supply_core.c b/drivers/power/supply/power_supply_core.c
+index cf7ec189a71b9..1729e1f18cae9 100644
+--- a/drivers/power/supply/power_supply_core.c
++++ b/drivers/power/supply/power_supply_core.c
+@@ -177,8 +177,8 @@ static int __power_supply_populate_supplied_from(struct device *dev,
+ 		if (np == epsy->of_node) {
+ 			dev_info(&psy->dev, "%s: Found supply : %s\n",
+ 				psy->desc->name, epsy->desc->name);
+-			psy->supplied_from[i-1] = (char *)epsy->desc->name;
+-			psy->num_supplies++;
++			psy->supplied_from[psy->num_supplies++] =
++				(char *)epsy->desc->name;
+ 			of_node_put(np);
+ 			break;
+ 		}

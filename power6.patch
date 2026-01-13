@@ -1,0 +1,41 @@
+From 6ae7a1a223ecfdef6e02bda8c7b3add42b5b2942 Mon Sep 17 00:00:00 2001
+From: Yonghua Yan <yanyh2@motorola.com>
+Date: Sun, 26 Sep 2021 16:08:57 +0530
+Subject: [PATCH] power: smb5: Report effective ICL value for current max
+
+Attach Turbo charger to a phone, its screen shows the messages:
+"Charging", followed by "Slowly Charging" and then finally
+"TurboPower connected". Display messages are confusing.
+
+This is because the USB ICL takes a period time to get settled
+down from low icl to the target icl.
+So here just return the target ICL to avoid this situation.
+
+Change-Id: I1a3e4641c31fde6b59cc017e01b26a6ea12c6d15
+Signed-off-by: Yonghua Yan <yanyh2@motorola.com>
+Reviewed-on: https://gerrit.mot.com/1364059
+SLTApproved: Slta Waiver
+SME-Granted: SME Approvals Granted
+Tested-by: Jira Key
+Reviewed-by: Haijian Ma <mahj8@motorola.com>
+Reviewed-by: Huosheng Liao <liaohs@motorola.com>
+Submit-Approved: Jira Key
+Reviewed-on: https://gerrit.mot.com/1502908
+Signed-off-by: neobuddy89 <neobuddy89@gmail.com>
+---
+ drivers/power/supply/qcom/qpnp-smb5.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/power/supply/qcom/qpnp-smb5.c b/drivers/power/supply/qcom/qpnp-smb5.c
+index f96d8cb48d1a..5d50f17542ee 100644
+--- a/drivers/power/supply/qcom/qpnp-smb5.c
++++ b/drivers/power/supply/qcom/qpnp-smb5.c
+@@ -905,7 +905,7 @@ static int smb5_usb_get_prop(struct power_supply *psy,
+ 		val->intval = get_client_vote(chg->usb_icl_votable, PD_VOTER);
+ 		break;
+ 	case POWER_SUPPLY_PROP_CURRENT_MAX:
+-		rc = smblib_get_prop_input_current_settled(chg, val);
++		val->intval = get_effective_result(chg->usb_icl_votable);
+ 		break;
+ 	case POWER_SUPPLY_PROP_TYPE:
+ 		val->intval = POWER_SUPPLY_TYPE_USB_PD;

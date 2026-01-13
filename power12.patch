@@ -1,0 +1,25 @@
+From 65e90ab01637d768b35fac3a92f410b4400a06dc Mon Sep 17 00:00:00 2001
+From: Pranav Reddy <reddy.pranav89@gmail.com>
+Date: Fri, 20 Jan 2023 16:34:23 +0300
+Subject: [PATCH] power: oplus_charger: Fix slow charge while screen is on
+
+Thanks to dodyirawan85
+
+Change-Id: I05c69921e836436365a4965b679bb752c56dd631
+---
+ drivers/power/oplus/oplus_charger.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/power/oplus/oplus_charger.c b/drivers/power/oplus/oplus_charger.c
+index 8c478852ded1d..94f00ce448f5b 100644
+--- a/drivers/power/oplus/oplus_charger.c
++++ b/drivers/power/oplus/oplus_charger.c
+@@ -4710,7 +4710,7 @@ static int fb_notifier_callback(struct notifier_block *nb,
+ 		if (event == FB_EVENT_BLANK) {
+ 			blank = *(int *)evdata->data;
+ 			if (blank == FB_BLANK_UNBLANK) {
+-				g_charger_chip->led_on = true;
++				g_charger_chip->led_on = false;
+ 				g_charger_chip->led_on_change = true;
+ 			} else if (blank == FB_BLANK_POWERDOWN) {
+ 				g_charger_chip->led_on = false;

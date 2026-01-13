@@ -1,0 +1,37 @@
+From 4ade0e6a299ea15dc3f12d19f25aa072ebc61985 Mon Sep 17 00:00:00 2001
+From: Haijian Ma <mahj8@motorola.com>
+Date: Thu, 6 Jun 2019 09:20:20 +0800
+Subject: [PATCH] power: smb5: Rerun APSD to ensure proper charger detection
+
+Rerun APSD to ensure proper charger detection if device
+boots with charger connected.
+
+Change-Id: I21c9be0c098b7e7ba388f71e9ba4b90180bfd112
+Signed-off-by: Haijian Ma <mahj8@motorola.com>
+Reviewed-on: https://gerrit.mot.com/1366956
+SME-Granted: SME Approvals Granted
+SLTApproved: Slta Waiver
+Tested-by: Jira Key
+Reviewed-by: Huosheng Liao <liaohs@motorola.com>
+Submit-Approved: Jira Key
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+---
+ drivers/power/supply/qcom/qpnp-smb5.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/power/supply/qcom/qpnp-smb5.c b/drivers/power/supply/qcom/qpnp-smb5.c
+index 199c1f375882..c77aed9c2157 100644
+--- a/drivers/power/supply/qcom/qpnp-smb5.c
++++ b/drivers/power/supply/qcom/qpnp-smb5.c
+@@ -2793,9 +2793,10 @@ static int smb5_init_hw(struct smb5 *chip)
+ 	 */
+ 	if (chg->chg_param.smb_version == PMI632_SUBTYPE) {
+ 		schgm_flash_init(chg);
+-		smblib_rerun_apsd_if_required(chg);
+ 	}
+ 
++	smblib_rerun_apsd_if_required(chg);
++
+ 	/* Use ICL results from HW */
+ 	rc = smblib_icl_override(chg, HW_AUTO_MODE);
+ 	if (rc < 0) {

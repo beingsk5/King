@@ -1,0 +1,28 @@
+From 9e6a6c8121730240e67f5712157f0d7b639f651e Mon Sep 17 00:00:00 2001
+From: Nauval Rizky <enuma.alrizky@gmail.com>
+Date: Sun, 29 May 2022 02:18:10 +0700
+Subject: [PATCH] power: qpnp-fg-gen4: Skip irrelevant Type-C Mode request
+
+I have no idea who is querying PROP_TYPEC_MODE on a damn fuelgauge
+driver (it maybe some proprietary services or HALs), we can get it
+from fg->usb_psy but I think better just ignore it instead.
+
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+Change-Id: Ifa256b3bbb71cb1e2a0979f8b2bc61c016119f51
+---
+ drivers/power/supply/qcom/qpnp-fg-gen4.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/power/supply/qcom/qpnp-fg-gen4.c b/drivers/power/supply/qcom/qpnp-fg-gen4.c
+index 892071fa67ccd..a63f0d11b6835 100644
+--- a/drivers/power/supply/qcom/qpnp-fg-gen4.c
++++ b/drivers/power/supply/qcom/qpnp-fg-gen4.c
+@@ -4472,6 +4472,8 @@ static int fg_psy_get_property(struct power_supply *psy,
+ 	case POWER_SUPPLY_PROP_CALIBRATE:
+ 		pval->intval = chip->calib_level;
+ 		break;
++	case POWER_SUPPLY_PROP_TYPEC_MODE:
++		return -ENODATA;
+ 	default:
+ 		pr_err("unsupported property %d\n", psp);
+ 		rc = -EINVAL;

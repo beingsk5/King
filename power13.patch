@@ -1,0 +1,51 @@
+From f36fde3531da4bbdafdd54ec07f6ace378a5f20b Mon Sep 17 00:00:00 2001
+From: engstk <eng.stk@sapo.pt>
+Date: Mon, 31 Jul 2017 18:28:24 +0100
+Subject: [PATCH] oplus_chg: charger: Implement usb2 fast charge mode
+
+@neobuddy89:
+This is stripped down version of actual patch to make it
+compile with oplus_charger as module.
+
+Enables force charging up to 900mA in usb2 mode
+
+echo 0 /sys/module/oplus_chg/parameters/force_fast_charge (disable)
+echo 1 /sys/module/oplus_chg/parameters/force_fast_charge (enable)
+
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+Signed-off-by: AnierinB <anierin@evolution-x.org>
+Change-Id: Ia7d3890d1581c7059f182c1d3e6c5e5cda746aea
+---
+ drivers/power/oplus/oplus_charger.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/power/oplus/oplus_charger.c b/drivers/power/oplus/oplus_charger.c
+index 453d3f6d146d2..8c478852ded1d 100644
+--- a/drivers/power/oplus/oplus_charger.c
++++ b/drivers/power/oplus/oplus_charger.c
+@@ -153,6 +153,12 @@ static bool suspend_charger = false;
+ static bool vbatt_higherthan_4180mv = false;
+ static bool vbatt_lowerthan_3300mv = false;
+ 
++static int force_fast_charge = 0;
++module_param(force_fast_charge, int, 0644);
++
++static int ffc_val = 900;
++module_param(ffc_val, int, 0644);
++
+ enum power_supply_property oplus_usb_props[] = {
+ 	POWER_SUPPLY_PROP_ONLINE,
+ 	POWER_SUPPLY_PROP_OTG_SWITCH,
+@@ -3655,7 +3661,11 @@ void oplus_chg_set_input_current_limit(struct oplus_chg_chip *chip)
+ 		case POWER_SUPPLY_TYPE_UNKNOWN:
+ 			return;
+ 		case POWER_SUPPLY_TYPE_USB:
+-			current_limit = chip->limits.input_current_usb_ma;
++			if (force_fast_charge > 0) {
++				current_limit = ffc_val;
++			} else {
++				current_limit = chip->limits.input_current_usb_ma;
++			}
+ 			break;
+ 		case POWER_SUPPLY_TYPE_USB_DCP:
+ 			current_limit = chip->limits.input_current_charger_ma;

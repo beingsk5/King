@@ -1,0 +1,40 @@
+From 23a66cd22b9a1e17beed5f3b907897565a219311 Mon Sep 17 00:00:00 2001
+From: Wasb Liu <wasbliu@google.com>
+Date: Mon, 29 Mar 2021 14:44:20 +0800
+Subject: [PATCH] power: smb-lib: Force suspend when cable out.
+
+Drawing 100mA in Unattached/SNK state is a violation
+as well as per the Type-C spec.
+
+Bug: 112876718
+Change-Id: I1bc352cd96b4b51c948a0b650a0bd0dda33b3ac2
+Signed-off-by: Wasb Liu <wasbliu@google.com>
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+---
+ drivers/power/supply/qcom/smb-lib.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/power/supply/qcom/smb-lib.c b/drivers/power/supply/qcom/smb-lib.c
+index d3c378a2b7082..0cf5da02a55ba 100644
+--- a/drivers/power/supply/qcom/smb-lib.c
++++ b/drivers/power/supply/qcom/smb-lib.c
+@@ -4002,8 +4002,8 @@ static void smblib_force_legacy_icl(struct smb_charger *chg, int pst)
+ 		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 3000000);
+ 		break;
+ 	default:
+-		smblib_err(chg, "Unknown APSD %d; forcing 500mA\n", pst);
+-		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 500000);
++		smblib_err(chg, "Unknown APSD %d; forcing suspend\n", pst);
++		vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 0);
+ 		break;
+ 	}
+ }
+@@ -4361,7 +4361,7 @@ static void smblib_handle_typec_removal(struct smb_charger *chg)
+ 	cancel_delayed_work_sync(&chg->hvdcp_detect_work);
+ 
+ 	/* reset input current limit voters */
+-	vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 100000);
++	vote(chg->usb_icl_votable, LEGACY_UNKNOWN_VOTER, true, 0);
+ 	vote(chg->usb_icl_votable, PD_VOTER, false, 0);
+ 	vote(chg->usb_icl_votable, USB_PSY_VOTER, false, 0);
+ 	vote(chg->usb_icl_votable, DCP_VOTER, false, 0);

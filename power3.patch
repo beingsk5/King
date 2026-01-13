@@ -1,0 +1,29 @@
+From 1623b4a48c910fe5baf20444a250749792fb906e Mon Sep 17 00:00:00 2001
+From: raghavt20 <raghavtandon2000@gmail.com>
+Date: Sat, 7 Aug 2021 11:05:50 +0200
+Subject: [PATCH] drivers: misc: power: implement usb2 fast charge mode
+
+Enables force charging up to 900mA in usb2 mode
+
+Change-Id: Iba6cf7eb4ae335067e64ac0a0f9054fa02b35aea
+Signed-off-by: Pranav Vashi <neobuddy89@gmail.com>
+---
+ drivers/power/supply/qcom/smb5-lib.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/power/supply/qcom/smb5-lib.c b/drivers/power/supply/qcom/smb5-lib.c
+index 8ac7d79991169..f75d53a54c437 100644
+--- a/drivers/power/supply/qcom/smb5-lib.c
++++ b/drivers/power/supply/qcom/smb5-lib.c
+@@ -1346,6 +1346,11 @@ static int set_sdp_current(struct smb_charger *chg, int icl_ua)
+ 	u8 icl_options;
+ 	const struct apsd_result *apsd_result = smblib_get_apsd_result(chg);
+ 
++	if (icl_ua == USBIN_500MA)
++	{
++		icl_ua = USBIN_900MA;
++	}
++
+ 	/* power source is SDP */
+ 	switch (icl_ua) {
+ 	case USBIN_100MA:
