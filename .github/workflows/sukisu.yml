@@ -50,7 +50,7 @@ jobs:
           cd clang
 
           echo "Downloading..."
-          wget -q --show-progress "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/20052113d2a5552cfff78ac7b21fd7953cc1c592/clang-r563880.tar.gz"
+          axel -q -n 8 --show-progress "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/20052113d2a5552cfff78ac7b21fd7953cc1c592/clang-r563880.tar.gz"
 
           FILE="$(ls *.tar.gz | head -n 1)"
           echo "Found archive: $FILE"
