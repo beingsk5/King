@@ -38,14 +38,33 @@ jobs:
          sudo apt install libelf-dev libarchive-tools lld llvm axel binutils make python3 libssl-dev build-essential bc  bison flex unzip libssl-dev ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs -y
          sudo apt install openjdk-17-jdk-headless -y
          
-         axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
-         mkdir clang && tar -zxvf linux-x86-refs_heads_main-clang-r547379.tar.gz -C clang
+         # axel -q -n 6 https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
+         # mkdir clang && tar -zxvf linux-x86-refs_heads_main-clang-r547379.tar.gz -C clang
          
+      - name: Download & Extract Google Clang (auto filename)
+        shell: bash
+        run: |
+          set -e
+          rm -rf clang/*
+          mkdir -p clang
+          cd clang
+
+          echo "Downloading..."
+          wget -q --show-progress "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/20052113d2a5552cfff78ac7b21fd7953cc1c592/clang-r563880.tar.gz"
+
+          FILE="$(ls *.tar.gz | head -n 1)"
+          echo "Found archive: $FILE"
+
+          tar -xzf "$FILE" --strip-components=1
+
+          echo "Done ✅"
+          ./bin/clang --version || true
         
       - name: ⚡ Checkout kernel's sourcecode and clone submodules
         run: |
           rm -rf kernel
-          git clone --recurse-submodules --depth=1 https://github.com/beingsk5/android_kernel_oneplus_sm8150 kernel -b 16vip
+          git clone --recurse-submodules --depth=1 https://github.com/beingsk5/android_kernel_oneplus_sm8150 kernel -b 16wip
+          
       - name: Add Re:binder support
         run: |
          export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
@@ -53,6 +72,7 @@ jobs:
          wget https://github.com/Sakion-Team/Re-Kernel/releases/download/modifier/Kernel-Modifier-v4.0.jar
          /usr/lib/jvm/java-17-openjdk-amd64/bin/java -jar ./Kernel-Modifier-v4.0.jar
          cd ..
+         
       - name: 📅 Export date of build
         run: |
           echo "DATE=$(date +%d%m%Y)" >> $GITHUB_ENV
@@ -138,7 +158,7 @@ jobs:
           export TARGET_PRODUCT=msmnile
           cd kernel
           make $KERNEL_CMDLINE CC="ccache clang" $KERNEL_DEFCONFIG
-          make $KERNEL_CMDLINE CC="ccache clang" Image modules -j$(nproc --all)
+          make $KERNEL_CMDLINE CC="ccache clang" -j$(nproc --all)
           
       - name: 🚀 Copy the compiled kernel to AnyKernel3 then create the zip
         run: |
